@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendoo | Log In</title>
+  <link rel="stylesheet" href="style/variables.css" />
+  
+  <link rel="stylesheet" href="style/root-stye.css" />
+  
+  <link rel="stylesheet" href="style/auth-style.css" />
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="auth.js" defer></script>
+</head>
+<body class="auth-page">
+  
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h1 class="logo-text">Spendoo</h1>
+
+      <div class="form">
+        <!-- Input Email -->
+        <div class="input-group">
+          <input type="email" id="loginEmail" required />
+          <label for="loginEmail">E-Mail</label>
+        </div>
+
+        <!-- Input Password -->
+        <div class="input-group">
+          <input type="password" id="loginPassword" required />
+          <label for="loginPassword">Password</label>
+        </div>
+
+        <!-- Lupa Password -->
+        <a href="#" class="forgot-link">Forgot Password?</a>
+
+        <!-- Log In Button -->
+        <button id="loginBtn" class="primary-btn">Log In</button>
+
+        <!-- Divider -->
+        <p class="divider">atau masuk dengan</p>
+
+        <!-- Social Login -->
+        <div class="social-login">
+          <img id="googleBtnLogin" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" title="Google"/>
+          <img id="facebookBtnLogin" src="Assets/img/logoFacebook.png" alt="Facebook" title="Facebook"/>
+          <img id="githubBtnLogin" src="https://www.svgrepo.com/show/475654/github-color.svg" alt="GitHub" title="GitHub"/>
+          <img id="appleBtnLogin" src="Assets/img/logoApple.png" alt="Apple" title="Apple"/>
+        </div>
+
+        <!-- Link to Sign Up / Guest -->
+        <div class="links">
+          <a href="signup.html">Sign Up</a>
+          <a href="#" id="asGuest">Continue as Guest</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
