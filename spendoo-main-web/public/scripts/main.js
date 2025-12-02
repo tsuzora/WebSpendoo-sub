@@ -187,7 +187,7 @@ async function fetchTransactions() {
     const token = await auth.currentUser.getIdToken();
 
     // 2. Call Vercel Server
-    const response = await fetch("/api/", {
+    const response = await fetch("app/api/route.ts", {
       method: "GET",
       headers: { Authorization: token },
     });
