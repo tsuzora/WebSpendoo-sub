@@ -174,9 +174,6 @@ function initApp(user) {
   // Mulai listener Firestore
   fetchTransactions();
 
-  // Setup event listener UI
-  setupEventListeners();
-
   // Sembunyikan loader jika ada
   if (loader) loader.classList.add("hidden");
 }
@@ -190,7 +187,7 @@ async function fetchTransactions() {
     const token = await auth.currentUser.getIdToken();
 
     // 2. Call Vercel Server
-    const response = await fetch("../app/api/getData/route.ts", {
+    const response = await fetch("/api/getData/", {
       method: "GET",
       headers: { Authorization: token },
     });
