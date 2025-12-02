@@ -190,7 +190,7 @@ async function fetchTransactions() {
     const token = await auth.currentUser.getIdToken();
 
     // 2. Call Vercel Server
-    const response = await fetch("/api/transactions", {
+    const response = await fetch("/app/api/getData/", {
       method: "GET",
       headers: { Authorization: token },
     });
@@ -433,7 +433,7 @@ function calculateBalance() {
   const balanceAmount = document.getElementById("balance-amount");
 
   if (!balanceAmount) return;
-  
+
   let totalIncome = 0;
   let totalExpense = 0;
 
