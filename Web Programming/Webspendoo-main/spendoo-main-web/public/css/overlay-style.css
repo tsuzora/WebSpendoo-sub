@@ -1,0 +1,411 @@
+/* === FULL PAGE OVERLAY (ADD TRANSACTION) === */
+.tx-page-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(180deg, #178237, #1b1c28);
+  z-index: 1001;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+.tx-page-overlay.show {
+  transform: translateX(0);
+}
+
+.tx-page-content {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.tx-page-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+}
+.tx-page-title {
+  flex-grow: 1;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+.tx-page-back-btn,
+.tx-page-delete-btn {
+  background: none;
+  border: none;
+  color: var(--sp-white);
+  cursor: pointer;
+  padding: 4px;
+}
+.tx-page-delete-btn {
+  color: var(--sp-pink);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.tx-page-delete-btn.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* === FORM ELEMENTS === */
+.tx-page-form-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+.tx-type-toggle {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.tx-type-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 99px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--sp-light-gray);
+  color: var(--sp-dark-secondary);
+}
+.tx-type-btn.income-active {
+  background-color: var(--sp-green);
+  color: var(--sp-dark);
+}
+.tx-type-btn.expense-active {
+  background-color: var(--sp-pink);
+  color: var(--sp-white);
+}
+
+.datetime-inputs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.datetime-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--sp-dark-secondary);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--sp-white);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.datetime-btn svg {
+  color: var(--sp-gray);
+}
+
+.form-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.form-input-group {
+  border-bottom: 1px solid var(--sp-gray);
+  padding-bottom: 8px;
+}
+.form-input-group:focus-within {
+  border-bottom-color: var(--sp-green);
+}
+.form-input-group label {
+  font-size: 0.85rem;
+  color: var(--sp-gray);
+}
+.form-input-group input {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--sp-white);
+  font-size: 1.1rem;
+  padding: 8px 0 4px;
+}
+.form-input-group input[readonly] {
+  cursor: pointer;
+}
+.amount-input-wrapper {
+  display: flex;
+  align-items: center;
+}
+.amount-input-wrapper span,
+.amount-input-wrapper input {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.tx-page-footer {
+  padding: 24px;
+  background-color: transparent;
+}
+.save-btn {
+  width: 100%;
+  background-color: var(--sp-green);
+  color: var(--sp-dark);
+  border: none;
+  border-radius: 99px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.save-btn:disabled {
+  background-color: var(--sp-gray);
+}
+
+/* === MODAL BACKDROP & GENERAL === */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* === MODAL TYPES === */
+/* Alert */
+.modal-content-alert {
+  background-color: var(--sp-dark-secondary);
+  color: var(--sp-white);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+.modal-content-alert h3 {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+}
+.modal-content-alert p {
+  margin: 0 0 24px;
+  color: var(--sp-gray);
+}
+.modal-alert-btn {
+  width: 100%;
+  background-color: var(--sp-green);
+  color: var(--sp-dark);
+  border: none;
+  border-radius: 99px;
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Sheet (Categories/Payment) */
+.modal-backdrop.sheet {
+  align-items: flex-end;
+}
+.modal-content-sheet {
+  background-color: var(--sp-green);
+  color: var(--sp-dark);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 24px 24px 0 0;
+  padding: 24px;
+  animation: slideUp 0.3s ease-in-out;
+}
+.modal-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.modal-sheet-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+.modal-sheet-close {
+  background: none;
+  border: none;
+  color: var(--sp-dark);
+  cursor: pointer;
+}
+.modal-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.modal-sheet-grid .grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--sp-dark);
+}
+.modal-sheet-grid .grid-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.modal-sheet-grid .grid-item svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Date Picker */
+.modal-backdrop.datepicker {
+  align-items: center;
+}
+.modal-content-datepicker {
+  background-color: var(--sp-white);
+  color: var(--sp-dark);
+  border-radius: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+.datepicker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.datepicker-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sp-dark);
+}
+.datepicker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sp-gray);
+  margin-bottom: 8px;
+}
+.datepicker-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.datepicker-days-grid button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+}
+.datepicker-days-grid .empty {
+  cursor: default;
+}
+.datepicker-days-grid button:not(.empty):hover {
+  background-color: rgba(52, 245, 140, 0.3);
+}
+.datepicker-days-grid .selected {
+  background-color: var(--sp-green);
+  color: var(--sp-dark);
+  font-weight: 600;
+}
+.datepicker-days-grid .today {
+  color: var(--sp-green);
+  font-weight: 600;
+}
+
+/* Time Picker */
+.modal-backdrop.timepicker {
+  align-items: center;
+}
+.modal-content-timepicker {
+  background-color: var(--sp-white);
+  color: var(--sp-dark);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+}
+.timepicker-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 24px;
+}
+.timepicker-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.timepicker-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.timepicker-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sp-gray);
+}
+.timepicker-btn:hover {
+  color: var(--sp-dark);
+}
+.timepicker-separator {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.timepicker-ampm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.timepicker-ampm button {
+  background-color: var(--sp-light-gray);
+  color: var(--sp-dark);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.timepicker-ampm button.active {
+  background-color: var(--sp-green);
+}
+.modal-set-btn {
+  width: 100%;
+  background-color: var(--sp-green);
+  color: var(--sp-dark);
+  border: none;
+  border-radius: 99px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}

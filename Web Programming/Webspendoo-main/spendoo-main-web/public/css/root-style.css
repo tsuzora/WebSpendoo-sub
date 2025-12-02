@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  /* Default gradient (can be overridden by auth pages) */
+  background: linear-gradient(180deg, #178237, #1b1c28);
+  color: var(--sp-white);
+  /* Min-height prevents background cutting off */
+  min-height: 95dvh;
+}
+
+/* Removing scroll arrows from number inputs globally */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.hidden {
+  display: none !important;
+}

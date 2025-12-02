@@ -1,0 +1,159 @@
+<!-- BALANCE CARD -->
+<template id="balance-card-template">
+  <div class="dashboard-container">
+    <!-- Kartu Saldo -->
+    <div class="balance-card">
+      <div id="text-content">
+        <h2 class="balance-title">Available Balance</h2>
+        <p id="balance-amount" class="balance-amount">Rp0</p>
+        <p class="balance-greeting">
+          Hi, <span id="user-greeting-name">User</span>!
+        </p>
+      </div>
+      <!-- Tombol Tambah Transaksi (FAB) -->
+      <button id="fab-add-tx" class="fab-add">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#1C1B23"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Transaksi Terkini -->
+    <section class="recent-transactions-section">
+      <h3 class="section-title">Recent Transactions</h3>
+      <div id="transaction-list" class="transaction-list-container">
+        <!-- Data transaksi akan diisi oleh JS -->
+        <p id="no-transaction-msg" class="no-transaction">
+          No Recent Transaction
+        </p>
+      </div>
+    </section>
+  </div>
+</template>
+
+<!-- NAVBAR -->
+<template id="navbar-template">
+  <header class="navbar">
+    <div class="navbar-left">
+      <h1 class="logo">Spendoo</h1>
+      <nav class="nav-links">
+        <a href="main.html" class="active">Home</a>
+        <a href="history.html" class="">History</a>
+        <a href="#" class="">Analyze</a>
+        <a href="#" class="">FAQ</a>
+      </nav>
+    </div>
+
+    <div class="navbar-right">
+      <div class="profile" id="profileBox">
+        <img
+          id="profilePic"
+          src="assets/img/user.png"
+          alt="Profil"
+          class="profile-img"
+        />
+        <span id="userName" class="username">Loading...</span>
+
+        <!-- Dropdown Menu (Teks diperbaiki) -->
+        <div class="profile-menu">
+          <a href="#">Pengaturan</a>
+          <a href="#">Export Data</a>
+          <a href="#">Laporan</a>
+          <a href="#">Kredit</a>
+          <a id="logoutBtn" href="#">Logout</a>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>
+
+<template id="list-container-template">
+  <div class="transactions-listing">
+    <div id="content-page-slot"></div>
+  </div>
+</template>
+<template id="history-container-template">
+    <h2>Activity Log</h2>
+  <div class="transactions-listing">
+    <div id="history-page-slot"></div>
+  </div>
+</template>
+
+<template id="transaction-home-template">
+  <div id="transaction-navigation" role="grid">
+    <div id="quick-filter" role="rowgroup">
+      <p>Quick Navigation</p>
+      <div id="filter-buttons">
+        <button id="">Income</button>
+        <button id="">Expense</button>
+        <button id="">Type</button>
+      </div>
+    </div>
+  </div>
+  <div id="transaction-listing-container" role="grid">
+    <div class="list-header" role="rowgroup">
+      <p id="col-header" role="columnheader">Name</p>
+      <p id="col-header" role="columnheader">Amount</p>
+      <p id="col-header" role="columnheader">Date Added</p>
+    </div>
+
+    <div id="scroll-container" class="transaction-scroll" role="rowgroup">
+      <div class="list-row" role="row">
+        <div id="cell-name" role="gridcell">Transaction 1</div>
+        <div id="cell-amount" role="gridcell">100000</div>
+        <div id="cell-date" role="gridcell">20 May 2025</div>
+      </div>
+      <div class="list-row" role="row">
+        <div id="cell-name" role="gridcell">Transaction 2</div>
+        <div id="cell-amount" role="gridcell">100000</div>
+        <div id="cell-date" role="gridcell">20 May 2025</div>
+      </div>
+      <div class="list-row" role="row">
+        <div id="cell-name" role="gridcell">Transaction 3</div>
+        <div id="cell-amount" role="gridcell">100000</div>
+        <div id="cell-date" role="gridcell">20 May 2025</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="history-content-template">
+
+  <div id="transaction-listing-container" role="grid">
+    <div class="activity-list-header" role="rowgroup">
+      <p id="col-header" role="columnheader">Type</p>
+      <p id="col-header" role="columnheader">Name</p>
+      <p id="col-header" role="columnheader">Date Added</p>
+    </div>
+
+    <div id="scroll-container" class="activity-scroll" role="rowgroup">
+      <div class="list-row" role="row">
+        <div id="cell-type" role="gridcell">Type 1</div>
+        <div id="cell-name" role="gridcell">Transaction 1</div>
+        <div id="cell-date" role="gridcell">20 May 2025</div>
+      </div>
+      <div class="list-row" role="row">
+        <div id="cell-type" role="gridcell">Type 2</div>
+        <div id="cell-name" role="gridcell">Transaction 2</div>
+        <div id="cell-date" role="gridcell">20 May 2025</div>
+      </div>
+      <div class="list-row" role="row">
+        <div id="cell-type" role="gridcell">Type 3</div>
+        <div id="cell-name" role="gridcell">Transaction 3</div>
+        <div id="cell-date" role="gridcell">20 May 2025</div>
+      </div>
+
+    </div>
+  </div>
+</template>
