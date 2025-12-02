@@ -98,9 +98,9 @@ const userNameDisplay = document.getElementById("userName");
 const profilePic = document.getElementById("profilePic");
 const logoutBtn = document.getElementById("logoutBtn");
 const userGreetingName = $("#user-greeting-name");
-const balanceAmount = $("#balance-amount");
-const transactionList = $("#transaction-list");
-const noTransactionMsg = $("#no-transaction-msg");
+// const balanceAmount = $("#balance-amount");
+// const transactionList = $("#transaction-list");
+// const noTransactionMsg = $("#no-transaction-msg");
 // const fabAddTx = $("#fab-add-tx");
 // Halaman Transaksi
 const pageTx = $("#page-tx");
@@ -430,6 +430,10 @@ function renderHistoryTable() {
 
 // Hitung dan Tampilkan Saldo
 function calculateBalance() {
+  const balanceAmount = document.getElementById("balance-amount");
+
+  if (!balanceAmount) return;
+  
   let totalIncome = 0;
   let totalExpense = 0;
 
