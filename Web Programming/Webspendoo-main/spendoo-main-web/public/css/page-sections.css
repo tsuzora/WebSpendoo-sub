@@ -1,3 +1,7 @@
+/* =========================================
+   1. GLOBAL PAGE SECTION STYLES
+   ========================================= */
+
 .page-section {
     display: none; /* Hidden by default */
     opacity: 0;
@@ -22,7 +26,8 @@
     }
 }
 
-.page-section h2 {
+/* Hanya h2 yang langsung jadi judul halaman (bukan di dalam card) */
+.page-section > h2 {
     max-height: 20dvh;
     padding: 48px 24px;
     margin: 0;
@@ -33,6 +38,7 @@
 /* =========================================
    2. HISTORY PAGE STYLES
    ========================================= */
+
 #history-content-slot {
     display: flex;
     flex-direction: column;
@@ -89,66 +95,308 @@
 }
 
 /* =========================================
-   3. ANALYZE PAGE STYLES
+   3. ANALYZE PAGE STYLES (NEW)
    ========================================= */
-
-#analyze-container-grid {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    width: 68dvw;
-    padding: 0px 24px;
-    gap: 36px;
-}
-.analyze-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Left card, Right chart */
-    gap: 30px;
-
+/* Section Analyze: card penuh dari kiri ke kanan */
+#page-analyze .analyze-layout {
+    width: 91vw;
+    max-width: 91vw;
+    padding: 0;         /* tetap rapi kiri-kanan */
+    margin: 0;
 }
 
-.analyze-card-container {
-    background-color: #022c1579;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+/* Card hijau besar Financial Overview */
+#page-analyze .analyze-card {
+    width: 100%;            
+    max-width: 91vw;
+    background: radial-gradient(circle at top left, #0b1120 0%, #064e3b 40%, #020617 100%);
+    border-radius: 28px;
+    padding: 26px 26px;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+    position: relative;
+    overflow: hidden;
+
+    /* tambahan supaya tidak terbatas width-nya */
+    margin: 0;
+    backdrop-filter: blur(6px);
+}
+
+/* Header */
+.analyze-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.analyze-header-row .page-title {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #f9fafb;
+}
+
+/* Toggle Per Bulan / Per Tahun + Filters */
+.analyze-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+/* Pill toggle */
+.pill-toggle {
+    display: inline-flex;
+    background: rgba(15, 23, 42, 0.9);
+    padding: 4px;
+    border-radius: 999px;
+}
+
+.pill-btn {
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.pill-btn.small {
+    padding-inline: 10px;
+    font-size: 0.8rem;
+}
+
+.pill-btn.active {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    color: #022c22;
+    font-weight: 600;
+}
+
+/* Filters */
+.analyze-filters {
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 400px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
-/* Wrapper for the chart to ensure responsive canvas */
+
+.analyze-filters label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.analyze-filters select {
+    background: #020617;
+    color: #e5e7eb;
+    border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.6);
+    padding: 4px 8px;
+}
+
+/* Summary */
+.analyze-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.summary-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #f9fafb;
+}
+
+/* Chart wrapper — FULL WIDTH */
 .charts-wrapper {
-    background-color: #022c1579;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin-top: 18px;
 }
 
-.financial-chart {
-    background-color: #022c1579;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 34.3dvh;
+.charts-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
-/* Responsive stack for smaller screens */
+/* "No Data Yet" text */
+.chart-empty {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #e5e7eb;
+    pointer-events: none;
+}
+
+/* Responsive */
 @media (max-width: 900px) {
-    .analyze-container {
-        grid-template-columns: 1fr;
+    #page-analyze .analyze-layout {
+        padding: 0 12px 24px;
     }
+}
+
+/* ===================== ADVICE STYLES ===================== */
+
+.advice-section {
+  margin-top: 32px;
+  border-top: 1px solid rgba(148,163,184,0.3);
+  padding-top: 20px;
+}
+
+.advice-title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.advice-block {
+  margin-bottom: 24px;
+  padding: 16px 14px 18px;
+  border-radius: 20px;
+  background: rgba(15,23,42,0.7);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.45);
+}
+
+.advice-heading {
+  margin: 0 0 6px 0;
+  font-size: 0.95rem;
+  color: #e5e7eb;
+}
+
+.gain-text {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.spent-text {
+  color: #f97373;
+  font-weight: 600;
+}
+
+.advice-total-label {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
+}
+
+.advice-total-label.income {
+  color: #22c55e;
+}
+
+.advice-total-label.expense {
+  color: #f97373;
+}
+
+.advice-total-value {
+  margin: 0 0 6px 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.advice-total-value.income {
+  color: #bbf7d0;
+}
+
+.advice-total-value.expense {
+  color: #fecaca;
+}
+
+.advice-comment {
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.advice-arrow {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.advice-arrow.up {
+  color: #22c55e;
+}
+
+.advice-arrow.down {
+  color: #f97373;
+}
+
+/* Chart + legend row */
+.advice-chart-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.advice-chart-wrapper {
+  width: 160px;
+  height: 160px;
+}
+
+.advice-chart-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.advice-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  font-size: 0.78rem;
+}
+
+.advice-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e5e7eb;
+}
+
+.advice-legend .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* Responsive: tumpuk vertikal di layar kecil */
+@media (max-width: 900px) {
+  .advice-chart-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .advice-chart-wrapper {
+    width: 140px;
+    height: 140px;
+  }
+
+  .advice-legend {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* =========================================
    4. FAQ PAGE STYLES
    ========================================= */
+
 .faq-container {
     display: flex;
     flex-direction: column;

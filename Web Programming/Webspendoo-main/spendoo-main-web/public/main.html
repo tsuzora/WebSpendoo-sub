@@ -6,12 +6,12 @@
     <title>Spendoo | Dashboard</title>
 
     <!-- External Stylesheets -->
-    <link rel="stylesheet" href="../css/variables.css" />
-    <link rel="stylesheet" href="../css/root-style.css" />
-    <link rel="stylesheet" href="../css/main-layout-style.css" />
-    <link rel="stylesheet" href="../css/component-style.css" />
-    <link rel="stylesheet" href="../css/overlay-style.css" />
-    <link rel="stylesheet" href="../css/page-sections.css" />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/root-style.css" />
+    <link rel="stylesheet" href="css/main-layout-style.css" />
+    <link rel="stylesheet" href="css/component-style.css" />
+    <link rel="stylesheet" href="css/overlay-style.css" />
+    <link rel="stylesheet" href="css/page-sections.css" />
   </head>
 
   <body>
@@ -80,22 +80,110 @@
       </section>
 
       <!-- 3. ANALYZE SECTION -->
-      <section id="page-analyze" class="page-section">
-        <h2>Financial Overview</h2>
-        <!-- Balance Card Reuse Slot -->
-        <div id="analyze-container-grid" role="row">
-          <div class="analyze-container">
-            <div class="analyze-card-container"></div>
+<!-- 3. ANALYZE SECTION -->
+<section id="page-analyze" class="page-section">
+  <div class="analyze-layout">
+    <div class="analyze-card glass-card">
+      <!-- HEADER -->
+      <div class="analyze-header-row">
+        <h2 class="page-title">Financial Overview</h2>
+      </div>
 
-            <!-- Canvas for Charts -->
-            <div class="charts-wrapper">
-              <canvas id="financialChart" width="600" height="400"></canvas>
-            </div>
-          </div>
-
-          <div class="financial-chart"></div>
+      <!-- TOGGLE PER BULAN / PER TAHUN + FILTER -->
+      <div class="analyze-top-row">
+        <div class="pill-toggle">
+          <button id="view-month" class="pill-btn active">Per Bulan</button>
+          <button id="view-year" class="pill-btn">Per Tahun</button>
         </div>
-      </section>
+
+        <div class="analyze-filters">
+          <label for="select-year">Tahun</label>
+          <select id="select-year"></select>
+
+          <label for="select-month" id="label-month">Bulan</label>
+          <select id="select-month"></select>
+        </div>
+      </div>
+
+      <!-- TOTAL + INCOME/EXPENSE -->
+      <div class="analyze-summary-row">
+        <div>
+          <p class="summary-label" id="analyze-summary-label">Total Income</p>
+          <p class="summary-value" id="analyze-total-value">Rp0</p>
+        </div>
+
+        <div class="pill-toggle">
+          <button id="type-income" class="pill-btn small active">Income</button>
+          <button id="type-expense" class="pill-btn small">Expense</button>
+        </div>
+      </div>
+
+      <!-- CHART GARIS / AREA -->
+      <div class="charts-wrapper">
+  <div id="chart-empty-state" class="chart-empty">
+    No data yet for this period
+  </div>
+  <canvas id="financialChart"></canvas>
+</div>
+
+      <!-- ===================== ADVICE SECTION ===================== -->
+      <div class="advice-section">
+        <h3 class="advice-title">Advice</h3>
+
+        <!-- INCOME BLOCK -->
+        <div class="advice-block income">
+          <p class="advice-heading">
+            Here's what you've <span class="gain-text">Gained</span> in
+            <span id="advice-income-period">August</span>
+          </p>
+
+          <p class="advice-total-label income">TOTAL:</p>
+          <p class="advice-total-value income" id="advice-income-total">Rp0</p>
+
+          <p class="advice-comment" id="advice-income-comment">
+            <span class="advice-arrow" id="advice-income-arrow">▲</span>
+            <span id="advice-income-text">
+              Your total income has no previous data to compare.
+            </span>
+          </p>
+
+          <div class="advice-chart-row">
+            <div class="advice-chart-wrapper">
+              <canvas id="adviceIncomeChart"></canvas>
+            </div>
+            <ul class="advice-legend" id="advice-income-legend"></ul>
+          </div>
+        </div>
+
+        <!-- EXPENSE BLOCK -->
+        <div class="advice-block expense">
+          <p class="advice-heading">
+            Here's what you've <span class="spent-text">Spent</span> in
+            <span id="advice-expense-period">August</span>
+          </p>
+
+          <p class="advice-total-label expense">TOTAL:</p>
+          <p class="advice-total-value expense" id="advice-expense-total">Rp0</p>
+
+          <p class="advice-comment" id="advice-expense-comment">
+            <span class="advice-arrow" id="advice-expense-arrow">▲</span>
+            <span id="advice-expense-text">
+              Your total spending has no previous data to compare.
+            </span>
+          </p>
+
+          <div class="advice-chart-row">
+            <div class="advice-chart-wrapper">
+              <canvas id="adviceExpenseChart"></canvas>
+            </div>
+            <ul class="advice-legend" id="advice-expense-legend"></ul>
+          </div>
+        </div>
+      </div>
+      <!-- =================== END ADVICE SECTION =================== -->
+    </div>
+  </div>
+</section>
 
       <!-- 4. FAQ SECTION -->
       <section id="page-faq" class="page-section">
@@ -290,8 +378,9 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="../scripts/main.js"></script>
-    <script src="../scripts/templates.js"></script>
-    <script src="../scripts/navigation.js"></script>
+    <script type="module" src="scripts/main.js"></script>
+    <script src="scripts/templates.js"></script>
+    <script src="scripts/navigation.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </body>
 </html>

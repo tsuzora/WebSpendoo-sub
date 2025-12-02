@@ -1,54 +1,64 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // =========================================
-    // 1. SELECTORS
-    // =========================================
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.page-section');
+// scripts/navigation.js
 
-    // =========================================
-    // 2. NAVIGATION FUNCTIONS
-    // =========================================
-    
-    /**
-     * Switches the visible page section based on the target ID.
-     * @param {string} targetId - The id suffix (e.g., 'home', 'history')
-     */
-    function switchPage(targetId) { 
-        // A. Hide all sections first
-        sections.forEach(section => {
-            section.style.display = 'none'; // Force hide
-            section.classList.remove('active'); // Remove animation class
-        });
+document.addEventListener("DOMContentLoaded", () => {
+  const navLinks = document.querySelectorAll(".nav-link");
+  const sections = document.querySelectorAll(".page-section");
+  const balanceCardSlot = document.getElementById("balance-card-slot");
 
-        // B. Find and show the target section
-        const targetSection = document.getElementById(`page-${targetId}`);
-        if (targetSection) {
-            targetSection.style.display = 'block';
-            
-            // Small delay allows the CSS fade-in animation to trigger
-            setTimeout(() => {
-                targetSection.classList.add('active');
-            }, 10);
-            
-        }
+  /**
+   * Set halaman aktif berdasarkan key:
+   *   "home", "history", "analyze", "faq"
+   */
+  function setActivePage(targetKey) {
+    const targetSectionId = `page-${targetKey}`;
+
+    // 1. Toggle class .active pada nav-link
+    navLinks.forEach((link) => {
+      if (link.dataset.target === targetKey) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+
+    // 2. Toggle class .active pada section page
+    sections.forEach((sec) => sec.classList.remove("active"));
+    const targetSection = document.getElementById(targetSectionId);
+    if (targetSection) {
+      targetSection.classList.add("active");
     }
 
-    // =========================================
-    // 3. EVENT LISTENERS
-    // =========================================
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault(); // Stop the browser from reloading
+    // 3. Tampilkan card Available Balance HANYA di Home
+    if (balanceCardSlot) {
+      if (targetKey === "home") {
+        balanceCardSlot.style.display = "";       // pakai display default (flex / block)
+      } else {
+        balanceCardSlot.style.display = "none";   // sembunyikan di History / Analyze / FAQ
+      }
+    }
+  }
 
-            const targetId = link.getAttribute('data-target');
-
-            // 1. Update Navbar Visuals (Green Active State)
-            navLinks.forEach(btn => btn.classList.remove('active'));
-            link.classList.add('active');
-
-            // 2. Perform the Page Switch
-            switchPage(targetId);
-        });
+  // Event click untuk semua nav-link
+  navLinks.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetKey = link.dataset.target; // "home", "history", "analyze", "faq"
+      if (!targetKey) return;
+      setActivePage(targetKey);
     });
-})
+  });
+
+  // Inisialisasi awal: cari section mana yang sudah punya .active
+  let initialKey = "home";
+  sections.forEach((sec) => {
+    if (sec.classList.contains("active")) {
+      const id = sec.id; // contoh: "page-home"
+      if (id && id.startsWith("page-")) {
+        initialKey = id.replace("page-", "");
+      }
+    }
+  });
+
+  // Apply state awal (termasuk show/hide balance-card-slot)
+  setActivePage(initialKey);
+});
