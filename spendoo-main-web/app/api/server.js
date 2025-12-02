@@ -18,7 +18,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 // 2. Helper to verify ID Token
-async function verifyAuth(request: Request) {
+async function verifyAuth(request) {
         const token = request.headers.get('Authorization');
         if (!token) return null;
 
@@ -31,7 +31,7 @@ async function verifyAuth(request: Request) {
 }
 
 // === GET: Fetch Transactions ===
-export async function GET(request: Request) {
+export async function GET(request) {
         const uid = await verifyAuth(request);
         if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -48,13 +48,13 @@ export async function GET(request: Request) {
                 });
 
                 return NextResponse.json(transactions);
-        } catch (error: any) {
+        } catch (error) {
                 return NextResponse.json({ error: error.message }, { status: 500 });
         }
 }
 
 // === POST: Add Transaction ===
-export async function POST(request: Request) {
+export async function POST(request) {
         const uid = await verifyAuth(request);
         if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -78,13 +78,13 @@ export async function POST(request: Request) {
                         const docRef = await collectionRef.add(txData);
                         return NextResponse.json({ message: 'Created', id: docRef.id });
                 }
-        } catch (error: any) {
+        } catch (error) {
                 return NextResponse.json({ error: error.message }, { status: 500 });
         }
 }
 
 // === DELETE: Remove Transaction ===
-export async function DELETE(request: Request) {
+export async function DELETE(request) {
         const uid = await verifyAuth(request);
         if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -97,7 +97,7 @@ export async function DELETE(request: Request) {
         try {
                 await db.collection(`users/${uid}/transactions`).doc(id).delete();
                 return NextResponse.json({ message: 'Deleted' });
-        } catch (error: any) {
+        } catch (error) {
                 return NextResponse.json({ error: error.message }, { status: 500 });
         }
 }
