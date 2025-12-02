@@ -101,10 +101,10 @@ const userGreetingName = $("#user-greeting-name");
 const balanceAmount = $("#balance-amount");
 const transactionList = $("#transaction-list");
 const noTransactionMsg = $("#no-transaction-msg");
-const fabAddTx = $("#fab-add-tx");
+// const fabAddTx = $("#fab-add-tx");
 // Halaman Transaksi
 const pageTx = $("#page-tx");
-const btnBackToHome = $("#btn-back-to-home");
+// const btnBackToHome = $("#btn-back-to-home");
 const txPageTitle = $("#tx-page-title");
 const btnTxTypeIncome = $("#btn-tx-type-income");
 const btnTxTypeExpense = $("#btn-tx-type-expense");
@@ -218,63 +218,213 @@ async function fetchTransactions() {
     transactions.sort((a, b) => b.date - a.date);
 
     renderTransactions();
+    renderHistoryTable();
     calculateBalance();
   } catch (e) {
     console.error("Error fetching transactions:", e);
     showAlert("Error", "Gagal mengambil data: " + e.message);
   }
 }
+
+function renderHomeTable() {
+  // Target the specific container in the Home Section
+  const container = document.getElementById("home-scroll-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  // Optional: Limit to recent 10 transactions
+  const recentTransactions = transactions.slice(0, 10); 
+
+  if (recentTransactions.length === 0) {
+    container.innerHTML = `<div style="padding:20px; text-align:center; color:#888;">No recent activity.</div>`;
+    return;
+  }
+
+  recentTransactions.forEach((tx) => {
+    // 1. Date Handling
+    let txDate;
+    if (tx.date && typeof tx.date.toDate === 'function') {
+      txDate = tx.date.toDate();
+    } else {
+      txDate = new Date(tx.date);
+    }
+    const dateStr = formatDate(txDate, { month: 'short', day: 'numeric', year: 'numeric' });
+    const amountStr = formatCurrency(tx.amount);
+
+    // 2. Icon Handling
+    const catObj = CATEGORIES[tx.type]?.find(c => c.name === tx.category);
+    const icon = catObj ? catObj.icon : ICONS.OTHERS;
+
+    // 3. Create Row using your Template Structure
+    const row = document.createElement("div");
+    row.className = "list-row"; 
+    row.setAttribute("role", "row");
+    row.dataset.id = tx.id;
+
+    // 4. Inject HTML matching the template
+    // We put the Icon inside #cell-name since there is no separate "Type" column in this template
+    row.innerHTML = `
+      <div id="cell-name" role="gridcell">
+         <div style="width:24px; height:24px; color: ${tx.type === 'income' ? '#2ecc71' : '#e74c3c'}">${icon}</div>
+         <span>${tx.category}</span>
+      </div>
+      
+      <div id="cell-amount" role="gridcell" style="color: ${tx.type === 'income' ? '#2ecc71' : '#e74c3c'}">
+         ${tx.type === 'expense' ? '-' : '+'} Rp${amountStr}
+      </div>
+      
+      <div id="cell-date" role="gridcell">
+         ${dateStr}
+      </div>
+    `;
+
+    // 5. Add Click Listener
+    row.addEventListener("click", () => openTxPage("edit", tx.id));
+    
+    container.appendChild(row);
+  });
+}
 // === MODIFIKASI SELESAI: Listener Realtime Firestore ===
 
 // Render Daftar Transaksi di Home
 // MODIFIKASI: Mengganti format tanggal di render agar sesuai desain gambar
+// === REPLACED: Render Home Table (Was renderTransactions) ===
+// === RENDER HOME TABLE (CSS Class Version) ===
 function renderTransactions() {
-  transactionList.innerHTML = "";
+  const container = document.getElementById("home-scroll-container");
+  if (!container) return;
+
+  container.innerHTML = "";
 
   if (transactions.length === 0) {
-    noTransactionMsg.classList.remove("hidden");
+    container.innerHTML = `<div style="padding:20px; text-align:center; color:#888;">No recent activity.</div>`;
     return;
   }
 
-  noTransactionMsg.classList.add("hidden");
+  // Limit to recent 10
+  const recentTransactions = transactions.slice(0, 10); 
 
+  recentTransactions.forEach((tx) => {
+    // 1. Date Handling
+    let txDate;
+    if (tx.date && typeof tx.date.toDate === 'function') {
+      txDate = tx.date.toDate();
+    } else {
+      txDate = new Date(tx.date);
+    }
+    const dateStr = formatDate(txDate, { month: 'short', day: 'numeric', year: 'numeric' });
+    const amountStr = formatCurrency(tx.amount);
+
+    // 2. Icon & Color Class Logic
+    const catObj = CATEGORIES[tx.type]?.find(c => c.name === tx.category);
+    const icon = catObj ? catObj.icon : ICONS.OTHERS;
+    
+    // Determine which class to use based on type
+    const colorClass = tx.type === 'income' ? 'text-income' : 'text-expense';
+    const sign = tx.type === 'expense' ? '-' : '+';
+
+    // 3. Create Row
+    const row = document.createElement("div");
+    row.className = "list-row"; 
+    row.setAttribute("role", "row");
+    row.dataset.id = tx.id;
+
+    // 4. Inject HTML (Using CSS Classes)
+    row.innerHTML = `
+      <div id="cell-name" role="gridcell">
+         <div class="icon-wrapper ${colorClass}">${icon}</div>
+         <span>${tx.category}</span>
+      </div>
+      
+      <div id="cell-amount" role="gridcell" class="${colorClass}">
+         ${sign} Rp${amountStr}
+      </div>
+      
+      <div id="cell-date" role="gridcell">
+         ${dateStr}
+      </div>
+    `;
+
+    // 5. Click Listener
+    row.addEventListener("click", () => openTxPage("edit", tx.id));
+    
+    container.appendChild(row);
+  });
+}
+
+function renderHistoryTable() {
+  // 1. Target the existing scroll container in HTML
+  const scrollContainer = document.getElementById("scroll-container");
+
+  // Safety check: if we aren't on a page with this container, stop.
+  if (!scrollContainer) return;
+
+  // 2. Clear current rows (so we don't duplicate when saving)
+  scrollContainer.innerHTML = "";
+
+  // 3. Handle Empty State
+  if (transactions.length === 0) {
+    scrollContainer.innerHTML = `
+      <div style="padding: 20px; text-align: center; color: var(--sp-gray);">
+        No transactions yet.
+      </div>`;
+    return;
+  }
+
+  // 4. Generate & Append Rows
   transactions.forEach((tx) => {
-    // 'tx.date' sekarang dijamin adalah Timestamp
-    // berkat modifikasi di setupFirestoreListener
-    const txDate = tx.date.toDate();
-    const typeClass = tx.type; // 'income' or 'expense'
+    // --- Date Safety Check ---
+    let txDate;
+    if (tx.date && typeof tx.date.toDate === "function") {
+      txDate = tx.date.toDate();
+    } else {
+      txDate = new Date(tx.date);
+    }
 
-    const categoryData = CATEGORIES[tx.type]?.find(
-      (c) => c.name === tx.category
-    ) || { icon: ICONS.OTHERS };
-    const icon = categoryData.icon;
-
-    const txElement = document.createElement("div");
-    txElement.className = `tx-item ${typeClass}`;
-    txElement.dataset.id = tx.id;
-
-    txElement.innerHTML = `
-            <div class="tx-item-left">
-                <div class="tx-item-icon">
-                    ${icon}
-                </div>
-                <div class="tx-item-details">
-                    <p class="tx-item-category">${tx.category}</p>
-                    <p class="tx-item-date">${formatDate(txDate, {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}</p>
-                </div>
-            </div>
-            <p class="tx-item-amount">Rp${formatCurrency(tx.amount)}</p>
-        `;
-
-    txElement.addEventListener("click", () => {
-      openTxPage("edit", tx.id);
+    // Formatting
+    const dateString = formatDate(txDate, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
+    const amountString = formatCurrency(tx.amount);
 
-    transactionList.appendChild(txElement);
+    // Icon Logic
+    const categoryObj = CATEGORIES[tx.type]?.find(
+      (c) => c.name === tx.category
+    );
+    const icon = categoryObj ? categoryObj.icon : ICONS.OTHERS;
+
+    // Create Row Element
+    const row = document.createElement("div");
+    row.className = "list-row";
+    row.dataset.id = tx.id;
+
+    // Inject HTML Structure
+    row.innerHTML = `
+      <div id="cell-name"">
+         <div style="width:32px; height:32px;">${icon}</div>
+         <span>
+            ${tx.category} 
+            <small style="opacity:0.6; display:block; font-size:0.8em;">${
+              tx.paymentMethod
+            }</small>
+         </span>
+      </div>
+      <div id="cell-date">${dateString}</div>
+      <div id="cell-amount" class="${
+        tx.type === "income" ? "income" : "expense"
+      }" style="font-weight:bold;">
+         ${tx.type === "expense" ? "-" : "+"} Rp${amountString}
+      </div>
+    `;
+
+    // Add Edit Listener
+    row.addEventListener("click", () => openTxPage("edit", tx.id));
+
+    // Append to container
+    scrollContainer.appendChild(row);
   });
 }
 
@@ -395,36 +545,64 @@ async function saveTransaction() {
     amount: amount,
     category: category,
     paymentMethod: paymentMethod,
-
-    // Simpan dalam format mobile agar sinkron
-    date: jsDate.getDate(), // Angka (misal: 21)
-    month: jsDate.toLocaleDateString("en-US", { month: "long" }), // String (misal: "October")
-    year: jsDate.getFullYear(), // Angka (misal: 2025)
-
-    // Tambahkan userID, ini praktik yang baik
-    userID: currentUserId,
+    date: jsDate.getDate(),
+    month: jsDate.toLocaleDateString("en-US", { month: "long" }),
+    year: jsDate.getFullYear(),
+    userID: currentUserId || "guest", // Handle null UserID
   };
-  // --- AKHIR KONVERSI DATA ---
-
-  const collectionPath = `users/${currentUserId}/transactions`;
 
   try {
     btnSaveTx.disabled = true;
     btnSaveTx.textContent = "Menyimpan...";
 
     const user = auth.currentUser;
-    if (!user) throw new Error("User not logged in");
 
+    // ============================================================
+    // 1. GUEST MODE LOGIC (Local Storage)
+    // ============================================================
+    if (!user) {
+      // Create a local transaction object
+      const guestTx = {
+        id: currentTxIdToEdit || "guest_" + Date.now(), // Generate unique ID
+        ...txData,
+        date: jsDate, // Keep as Date object for immediate rendering
+      };
+
+      if (currentTxIdToEdit) {
+        // Edit Existing
+        const index = transactions.findIndex((t) => t.id === currentTxIdToEdit);
+        if (index !== -1) transactions[index] = guestTx;
+      } else {
+        // Add New (Add to top of list)
+        transactions.unshift(guestTx);
+      }
+
+      // Save to LocalStorage so it survives refresh
+      // We filter out complex objects if necessary, but JSON.stringify handles Dates as strings automatically
+      localStorage.setItem("guest_transactions", JSON.stringify(transactions));
+
+      // Update UI Immediately
+      renderTransactions();
+      renderHomeTable();
+      renderHistoryTable();
+      calculateBalance();
+      closeTxPage();
+
+      console.log("Transaction saved locally (Guest Mode)");
+      return; // STOP HERE (Do not run server code)
+    }
+
+    // ============================================================
+    // 2. SERVER LOGIC (Logged In User)
+    // ============================================================
     const token = await user.getIdToken();
 
-    // Prepare Payload
     const payload = {
       ...txData,
-      date: jsDate.toISOString(), // Send as String to server
-      id: currentTxIdToEdit, // Undefined if adding, ID if editing
+      date: jsDate.toISOString(),
+      id: currentTxIdToEdit,
     };
 
-    // Send to Server
     const response = await fetch("/api/transactions", {
       method: "POST",
       headers: {
@@ -437,15 +615,13 @@ async function saveTransaction() {
     if (!response.ok) throw new Error("Server failed to save");
 
     console.log("Transaction saved via Server");
-
-    // REFRESH DATA (Since we don't have realtime listener anymore)
-    await fetchTransactions();
-
+    await fetchTransactions(); // Refresh from server
     closeTxPage();
   } catch (e) {
     console.error("Error saving transaction:", e);
     showAlert("Error", "Gagal menyimpan transaksi. " + e.message);
   } finally {
+    // Reset Button State
     btnSaveTx.disabled = false;
     btnSaveTx.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1B23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save`;
   }
@@ -677,85 +853,85 @@ function formatTime(date) {
   });
 }
 
-// === EVENT LISTENERS UI ===
-// ... (Event Listener Anda tidak perlu diubah) ...
-function setupEventListeners() {
-  // Halaman Home
-  fabAddTx.addEventListener("click", () => openTxPage("add"));
+document.body.addEventListener("click", (e) => {
+  const fabBtn =
+    e.target.closest(".fab-add") || e.target.closest("#fab-add-tx");
+  if (fabBtn) {
+    openTxPage("add");
+  }
+  const backHome =
+    e.target.closest("#btn-back-to-home") ||
+    e.target.closest(".tx-page-back-btn");
+  if (backHome) {
+    closeTxPage();
+  }
+  const saveBtn = e.target.closest("#btn-save-tx");
+  if (saveBtn) {
+    saveTransaction();
+  }
 
-  // Halaman Transaksi
-  btnBackToHome.addEventListener("click", closeTxPage);
-  btnTxTypeIncome.addEventListener("click", () => updateTxType("income"));
-  btnTxTypeExpense.addEventListener("click", () => updateTxType("expense"));
-  btnSaveTx.addEventListener("click", saveTransaction);
-  btnDeleteTx.addEventListener("click", deleteTransaction);
+  const deleteBtn = e.target.closest("#btn-delete-tx");
+  if (deleteBtn) {
+    deleteTransaction();
+  }
 
-  // Pembuka Modal
-  txCategory.addEventListener("click", openCategoryModal);
-  txPayment.addEventListener("click", openPaymentModal);
-  btnOpenDatePicker.addEventListener("click", openDatePicker);
-  btnOpenTimePicker.addEventListener("click", openTimePicker);
+  // --- 4. Transaction Type Toggles ---
+  const incomeBtn = e.target.closest("#btn-tx-type-income");
+  if (incomeBtn) {
+    updateTxType("income");
+  }
 
-  // Penutup Modal
-  btnCloseCategoryModal.addEventListener("click", closeCategoryModal);
-  categoryModal.addEventListener("click", (e) => {
-    if (e.target === categoryModal) closeCategoryModal();
-  });
-  btnClosePaymentModal.addEventListener("click", closePaymentModal);
-  paymentModal.addEventListener("click", (e) => {
-    if (e.target === paymentModal) closePaymentModal();
-  });
-  datepickerModal.addEventListener("click", (e) => {
-    if (e.target === datepickerModal) closeDatePicker();
-  });
-  timepickerModal.addEventListener("click", (e) => {
-    if (e.target === timepickerModal) closeTimePicker();
-  });
-  btnCloseAlert.addEventListener("click", () =>
-    alertModal.classList.add("hidden")
-  );
+  const expenseBtn = e.target.closest("#btn-tx-type-expense");
+  if (expenseBtn) {
+    updateTxType("expense");
+  }
 
-  // Kontrol Date Picker
-  datepickerPrevMonth.addEventListener("click", () => {
+  if (e.target.closest("#tx-category")) openCategoryModal();
+  if (e.target.closest("#tx-payment")) openPaymentModal();
+  if (e.target.closest("#btn-open-datepicker")) openDatePicker();
+  if (e.target.closest("#btn-open-timepicker")) openTimePicker();
+
+  // --- 6. Close Modals (Buttons) ---
+  if (e.target.closest("#btn-close-category-modal")) closeCategoryModal();
+  if (e.target.closest("#btn-close-payment-modal")) closePaymentModal();
+  if (e.target.closest("#btn-close-alert")) alertModal.classList.add("hidden");
+
+  // --- 7. Close Modals (Backdrop Clicks) ---
+  // Note: We check e.target directly here (not closest) to ensure we clicked the background
+  if (e.target.id === "category-modal") closeCategoryModal();
+  if (e.target.id === "payment-modal") closePaymentModal();
+  if (e.target.id === "datepicker-modal") closeDatePicker();
+  if (e.target.id === "timepicker-modal") closeTimePicker();
+
+  // --- 8. Date/Time Picker Controls ---
+  if (e.target.closest("#datepicker-prev-month")) {
     currentDatePickerDate.setMonth(currentDatePickerDate.getMonth() - 1);
     renderDatePicker();
-  });
-  datepickerNextMonth.addEventListener("click", () => {
+  }
+  if (e.target.closest("#datepicker-next-month")) {
     currentDatePickerDate.setMonth(currentDatePickerDate.getMonth() + 1);
     renderDatePicker();
-  });
+  }
 
-  // Kontrol Time Picker
-  btnSetTime.addEventListener("click", setTimeFromPicker);
-  timeAmpmAm.addEventListener("click", () => updateTimePickerAMPM("AM"));
-  timeAmpmPm.addEventListener("click", () => updateTimePickerAMPM("PM"));
+  if (e.target.closest("#btn-set-time")) setTimeFromPicker();
+  if (e.target.closest("#time-ampm-am")) updateTimePickerAMPM("AM");
+  if (e.target.closest("#time-ampm-pm")) updateTimePickerAMPM("PM");
 
-  const changeTime = (element, delta, min, max, wrap) => {
-    let value = parseInt(element.textContent);
-    value += delta;
-    if (wrap) {
+  // Time Picker Arrows (Helper function to reduce repetition)
+  const handleTimeChange = (btnId, displayElem, delta, min, max) => {
+    if (e.target.closest(btnId)) {
+      let value = parseInt(displayElem.textContent) + delta;
       if (value > max) value = min;
       if (value < min) value = max;
-    } else {
-      if (value > max) value = max;
-      if (value < min) value = min;
+      displayElem.textContent = String(value).padStart(2, "0");
     }
-    element.textContent = String(value).padStart(2, "0");
   };
 
-  timeHourUp.addEventListener("click", () =>
-    changeTime(timeHourDisplay, 1, 1, 12, true)
-  );
-  timeHourDown.addEventListener("click", () =>
-    changeTime(timeHourDisplay, -1, 1, 12, true)
-  );
-  timeMinuteUp.addEventListener("click", () =>
-    changeTime(timeMinuteDisplay, 1, 0, 59, true)
-  );
-  timeMinuteDown.addEventListener("click", () =>
-    changeTime(timeMinuteDisplay, -1, 0, 59, true)
-  );
-}
+  handleTimeChange("#time-hour-up", timeHourDisplay, 1, 1, 12);
+  handleTimeChange("#time-hour-down", timeHourDisplay, -1, 1, 12);
+  handleTimeChange("#time-minute-up", timeMinuteDisplay, 1, 0, 59);
+  handleTimeChange("#time-minute-down", timeMinuteDisplay, -1, 0, 59);
+});
 
 // === OTENTIKASI ===
 onAuthStateChanged(auth, (user) => {
@@ -791,6 +967,8 @@ onAuthStateChanged(auth, (user) => {
 
     if (userNameDisplay) userNameDisplay.textContent = "Guest";
     if (profilePic) profilePic.src = "assets/img/user.png";
+
+    loadGuestData();
   } else {
     // === KONDISI 3: BELUM LOGIN & BUKAN GUEST ===
     console.log("onAuthStateChanged: No user. Redirecting to login.");
@@ -850,3 +1028,18 @@ document.addEventListener("click", (e) => {
     container.classList.remove("active");
   }
 });
+
+function loadGuestData() {
+  const localData = localStorage.getItem("guest_transactions");
+  if (localData) {
+    const parsedData = JSON.parse(localData);
+    // Convert date strings back to Date objects
+    transactions = parsedData.map((tx) => ({
+      ...tx,
+      date: new Date(tx.date),
+    }));
+    renderTransactions();
+    renderHistoryTable();
+    calculateBalance();
+  }
+}
