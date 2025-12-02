@@ -35,7 +35,7 @@
           <div class="profile-header">
             <!-- Profile Image -->
             <img
-              src="assets/img/user.png"
+              src="../assets/img/user.png"
               alt="User Profile"
               class="profile-img"
             />
@@ -70,13 +70,40 @@
       <!-- 1. HOME SECTION (Original Dashboard) -->
       <div id="balance-card-slot"></div>
       <section id="page-home" class="page-section active">
-        <!-- Konten dashboard utama -->
-        <div id="transaction-home-slot"></div>
+        <div id="transaction-navigation" role="grid">
+          <div id="quick-filter" role="rowgroup">
+            <p style="color: var(--sp-green); font-weight: 700; margin-bottom: 10px;">Quick Navigation</p>
+            <div id="filter-buttons">
+              <button id="filter-income-btn" class="filter-chip">Income</button>
+              <button id="filter-expense-btn" class="filter-chip">Expense</button>
+              <button id="filter-cat-btn" class="filter-chip">Category</button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="transaction-listing-container" role="grid">
+          <div class="list-header" role="rowgroup">
+            <p class="col-header" role="columnheader">Name</p>
+            <p class="col-header" role="columnheader">Amount</p>
+            <p class="col-header" role="columnheader">Date Added</p>
+          </div>
+        
+          <div id="home-scroll-container" class="activity-scroll" role="rowgroup">
+          </div></div>
       </section>
+
       <!-- 2. HISTORY SECTION -->
       <section id="page-history" class="page-section">
         <!-- Slot for History Banners -->
-        <div id="history-content-slot"></div>
+        <div id="transaction-listing-container">
+          <div class="list-header">
+            <div id="col-header">Category</div>
+            <div id="col-header">Date</div>
+            <div id="col-header">Amount</div>
+          </div>
+        
+          <div id="scroll-container">
+          </div></div>
       </section>
 
       <!-- 3. ANALYZE SECTION -->
@@ -207,91 +234,66 @@
     <!-- Transaction Entry Overlay -->
     <div id="page-tx" class="tx-page-overlay">
       <div class="tx-page-content">
+        <!-- Header Halaman -->
         <header class="tx-page-header">
           <button id="btn-back-to-home" class="tx-page-back-btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
           <h2 id="tx-page-title" class="tx-page-title">Add Transaction</h2>
           <button id="btn-delete-tx" class="tx-page-delete-btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path
-                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-              ></path>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </header>
-
+  
+        <!-- Konten Form -->
         <div class="tx-page-form-container">
+          <!-- Toggle Income/Expense -->
           <div class="tx-type-toggle">
             <button id="btn-tx-type-income" class="tx-type-btn">Income</button>
-            <button id="btn-tx-type-expense" class="tx-type-btn">
-              Expense
-            </button>
+            <button id="btn-tx-type-expense" class="tx-type-btn">Expense</button>
           </div>
-
+  
+          <!-- Input Tanggal & Waktu -->
           <div class="datetime-inputs">
             <button id="btn-open-datepicker" class="datetime-btn">
-              <span id="tx-date-display">Select Date</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span id="tx-date-display">November 05, 2025</span>
             </button>
             <button id="btn-open-timepicker" class="datetime-btn">
-              <span id="tx-time-display">Select Time</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span id="tx-time-display">12:00 PM</span>
             </button>
           </div>
-
+  
+          <!-- Input Form -->
           <div class="form-inputs">
+            <!-- Amount -->
             <div class="form-input-group">
               <label for="tx-amount">Amount</label>
               <div class="amount-input-wrapper">
-                <span>Rp</span>
-                <input type="number" id="tx-amount" placeholder="0" />
+                <span>Rp </span>
+                <input type="number" id="tx-amount" placeholder="0">
               </div>
             </div>
+            <!-- Category -->
             <div class="form-input-group">
               <label for="tx-category">Category</label>
-              <input
-                type="text"
-                id="tx-category"
-                placeholder="Select category"
-                readonly
-              />
+              <input type="text" id="tx-category" placeholder="Select category" readonly>
             </div>
+            <!-- Payment Method (Sekarang akan selalu tampil) -->
             <div id="payment-method-container" class="form-input-group">
               <label for="tx-payment">Payment Method</label>
-              <input
-                type="text"
-                id="tx-payment"
-                placeholder="Select payment method"
-                readonly
-              />
+              <input type="text" id="tx-payment" placeholder="Select payment method" readonly>
             </div>
           </div>
         </div>
-
+  
+        <!-- Tombol Save -->
         <div class="tx-page-footer">
-          <button id="btn-save-tx" class="save-btn">Save</button>
+          <button id="btn-save-tx" class="save-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1B23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Save
+          </button>
         </div>
       </div>
     </div>
