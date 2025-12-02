@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "app/api/route.js"  ],
+, "app/api/transactions/route.js"  ],
   "exclude": ["node_modules"]
 }
