@@ -619,7 +619,7 @@ async function saveTransaction() {
       id: currentTxIdToEdit,
     };
 
-    const response = await fetch("/api/transactions", {
+    const response = await fetch(`${BASE_URL}/api/transactions`, {
       method: "POST",
       headers: {
         Authorization: token,
@@ -659,7 +659,7 @@ async function deleteTransaction() {
     btnDeleteTx.disabled = true;
     const token = await auth.currentUser.getIdToken();
 
-    const response = await fetch(`/api/transactions?id=${currentTxIdToEdit}`, {
+    const response = await fetch(`${BASE_URL}/api/transactions/?id=${currentTxIdToEdit}`, {
       method: "DELETE",
       headers: { Authorization: token },
     });
