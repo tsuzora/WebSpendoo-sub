@@ -1,48 +1,74 @@
 import { NextResponse } from 'next/server';
 import * as admin from 'firebase-admin';
 
+export const dynamic = 'force-dynamic';
+
 // 1. Initialize Firebase Admin (Server-Side)
-if (!admin.apps.length) {
-        admin.initializeApp({
-                credential: admin.credential.cert({
-                        projectId: process.env.FIREBASE_PROJECT_ID,
-                        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                        // Handle newline characters in the private key
-                        privateKey: process.env.FIREBASE_PRIVATE_KEY
-                                ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-                                : undefined,
-                }),
-        });
+function getDB() {
+        if (admin.apps.length > 0) {
+                return admin;
+        }
+
+        // Get the encoded file
+        const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+
+        if (!serviceAccountBase64) {
+                throw new Error("FIREBASE_SERVICE_ACCOUNT_BASE64 is missing!");
+        }
+
+        try {
+                // DECODE: Base64 -> String -> JSON Object
+                const serviceAccountJson = JSON.parse(
+                        Buffer.from(serviceAccountBase64, 'base64').toString('utf-8')
+                );
+
+                admin.initializeApp({
+                        credential: admin.credential.cert(serviceAccountJson), // Pass the whole object directly
+                });
+
+                console.log("Firebase initialized successfully (Base64 method)");
+        } catch (error: any) {
+                console.error("Firebase Init Failed:", error);
+                // If it fails here, it's definitely a bad Base64 string
+                throw new Error("Failed to parse Service Account. Check Base64 string.");
+        }
+
+        return admin;
 }
 
-const db = admin.firestore();
 
 // 2. Helper to verify ID Token
 async function verifyAuth(request: Request) {
-        const token = request.headers.get('Authorization');
-        if (!token) return null;
+        const app = getDB();
+
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+
+        const token = authHeader.split('Bearer ')[1];
 
         try {
-                const decodedToken = await admin.auth().verifyIdToken(token);
+                const decodedToken = await app.auth().verifyIdToken(token);
                 return decodedToken.uid;
         } catch (error) {
+                console.error("Auth Failed:", error);
                 return null;
         }
 }
 
 // === GET: Fetch Transactions ===
 export async function GET(request: Request) {
-        const uid = await verifyAuth(request);
-        if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
         try {
+                const uid = await verifyAuth(request);
+                if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+                const db = getDB().firestore();
                 const snapshot = await db.collection(`users/${uid}/transactions`).get();
+
                 const transactions = snapshot.docs.map(doc => {
                         const data = doc.data();
                         return {
                                 id: doc.id,
                                 ...data,
-                                // Convert Firestore Timestamp to String
                                 date: data.date && data.date.toDate ? data.date.toDate().toISOString() : data.date
                         };
                 });
@@ -53,28 +79,23 @@ export async function GET(request: Request) {
         }
 }
 
-// === POST: Add Transaction ===
 export async function POST(request: Request) {
-        const uid = await verifyAuth(request);
-        if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
         try {
-                const data = await request.json();
-                const { id, ...txData } = data; // Separate ID if editing
+                const uid = await verifyAuth(request);
+                if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-                // Ensure date is a proper Date object for Firestore
-                if (txData.date) {
-                        txData.date = new Date(txData.date);
-                }
+                const db = getDB().firestore();
+                const data = await request.json();
+                const { id, ...txData } = data;
+
+                if (txData.date) txData.date = new Date(txData.date);
 
                 const collectionRef = db.collection(`users/${uid}/transactions`);
 
                 if (id) {
-                        // Edit existing
                         await collectionRef.doc(id).set(txData, { merge: true });
                         return NextResponse.json({ message: 'Updated', id });
                 } else {
-                        // Create new
                         const docRef = await collectionRef.add(txData);
                         return NextResponse.json({ message: 'Created', id: docRef.id });
                 }
@@ -83,18 +104,17 @@ export async function POST(request: Request) {
         }
 }
 
-// === DELETE: Remove Transaction ===
 export async function DELETE(request: Request) {
-        const uid = await verifyAuth(request);
-        if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        // Get ID from URL query parameters (e.g., ?id=123)
-        const { searchParams } = new URL(request.url);
-        const id = searchParams.get('id');
-
-        if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
-
         try {
+                const uid = await verifyAuth(request);
+                if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+                const db = getDB().firestore();
+                const { searchParams } = new URL(request.url);
+                const id = searchParams.get('id');
+
+                if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+
                 await db.collection(`users/${uid}/transactions`).doc(id).delete();
                 return NextResponse.json({ message: 'Deleted' });
         } catch (error: any) {
