@@ -192,7 +192,7 @@ async function fetchTransactions() {
     const token = await auth.currentUser.getIdToken();
 
     // 2. Call Vercel Server
-    const response = await fetch(`${BASE_URL}/api.transactions`, {
+    const response = await fetch(`${BASE_URL}/api/transactions`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
