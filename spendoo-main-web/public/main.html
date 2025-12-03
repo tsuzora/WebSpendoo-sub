@@ -55,6 +55,7 @@
 
       <!-- HOME -->
       <div id="balance-card-slot"></div>
+
       <section id="page-home" class="page-section active">
         <div id="transaction-navigation" role="grid">
           <div id="quick-filter" role="rowgroup">
@@ -89,110 +90,125 @@
           <div id="scroll-container"></div>
         </div>
       </section>
-
-      <!-- ===================== ANALYZE ===================== -->
       <section id="page-analyze" class="page-section">
 
-        <div class="analyze-layout">
-          <div class="analyze-card glass-card">
+  <div class="analyze-layout">
 
-            <!-- HEADER -->
-            <div class="analyze-header-row">
-              <h2 class="page-title">Financial Overview</h2>
-            </div>
+    <!-- ===================================== -->
+    <!-- 1) FINANCIAL OVERVIEW (CHART)        -->
+    <!-- ===================================== -->
+    <div class="analyze-card glass-card">
 
-            <!-- TOGGLES -->
-            <div class="analyze-top-row">
-              <div class="pill-toggle">
-                <button id="view-month" class="pill-btn active">Per Bulan</button>
-                <button id="view-year" class="pill-btn">Per Tahun</button>
-              </div>
+      <!-- HEADER -->
+      <div class="analyze-header-row">
+        <h2 class="page-title">Financial Overview</h2>
+      </div>
 
-              <div class="analyze-filters">
-                <label for="select-year">Tahun</label>
-                <select id="select-year"></select>
+      <!-- TOGGLES -->
+      <div class="analyze-top-row">
+        <div class="pill-toggle">
+          <button id="view-month" class="pill-btn active">Per Bulan</button>
+          <button id="view-year" class="pill-btn">Per Tahun</button>
+        </div>
 
-                <label for="select-month" id="label-month">Bulan</label>
-                <select id="select-month"></select>
-              </div>
-            </div>
+        <div class="analyze-filters">
+          <label for="select-year">Tahun</label>
+          <select id="select-year"></select>
 
-            <!-- SUMMARY -->
-            <div class="analyze-summary-row">
-              <div>
-                <p class="summary-label" id="analyze-summary-label">Total Income</p>
-                <p class="summary-value" id="analyze-total-value">Rp0</p>
-              </div>
-              <div class="pill-toggle">
-                <button id="type-income" class="pill-btn small active">Income</button>
-                <button id="type-expense" class="pill-btn small">Expense</button>
-              </div>
-            </div>
+          <label for="select-month" id="label-month">Bulan</label>
+          <select id="select-month"></select>
+        </div>
+      </div>
 
-            <!-- CHART -->
-            <div class="charts-wrapper">
-              <div id="chart-empty-state" class="chart-empty">No data yet for this period</div>
-              <canvas id="financialChart"></canvas>
-            </div>
+      <!-- SUMMARY -->
+      <div class="analyze-summary-row">
+        <div>
+          <p class="summary-label" id="analyze-summary-label">Total Income</p>
+          <p class="summary-value" id="analyze-total-value">Rp0</p>
+        </div>
 
-          </div> <!-- END analyze-card -->
-        </div> <!-- END analyze-layout -->
+        <div class="pill-toggle">
+          <button id="type-income" class="pill-btn small active">Income</button>
+          <button id="type-expense" class="pill-btn small">Expense</button>
+        </div>
+      </div>
 
-        <!-- ===================== ADVICE SECTION (CORRECT POSITION) ===================== -->
-        <section class="advice-section">
+      <!-- CHART -->
+      <div class="charts-wrapper">
+        <div id="chart-empty-state" class="chart-empty">No data yet for this period</div>
+        <canvas id="financialChart"></canvas>
+      </div>
 
-          <!-- Filled via JS -->
-          <div id="grade-summary"></div>
-          <div id="detailed-advices"></div>
+    </div> <!-- END analyze-card -->
 
-          <h3 class="advice-title">Advice</h3>
 
-          <!-- DONUT: INCOME -->
-          <div class="advice-block">
-            <h4 class="advice-heading">
-              Here’s What You’ve <span class="gain-text">Gained</span> in
-              <span id="adviceIncomePeriod">August</span>
-            </h4>
-            <p class="advice-total-label income">TOTAL:</p>
-            <p id="advice-income-total" class="advice-total-value income">Rp0</p>
-            <p id="advice-income-text" class="advice-comment">
-              <span id="advice-income-arrow" class="advice-arrow up">▲</span>
-              <span id="advice-income-change">Your total income increased by 0% compared to last period.</span>
-            </p>
+    <!-- ======================================================== -->
+    <!-- 2) ADVICE + GRADE (DIGABUNG JADI SATU SECTION PANJANG ) -->
+    <!-- ======================================================== -->
+    <div class="advice-section">
 
-            <div class="advice-chart-row">
-              <div class="advice-chart-wrapper">
-                <canvas id="adviceIncomeChart"></canvas>
-              </div>
-              <ul id="advice-income-legend" class="advice-legend"></ul>
-            </div>
+      <!-- AI GRADE CARD (Inject via JS) -->
+      <div id="grade-summary"></div>
+
+      <!-- Detailed AI Advice Cards (Inject via JS) -->
+      <div id="detailed-advices"></div>
+
+      <!-- Title -->
+      <h3 class="advice-title">Advice</h3>
+
+      <!-- DONUT INCOME -->
+      <div class="advice-block">
+        <h4 class="advice-heading">
+          Here’s What You’ve <span class="gain-text">Gained</span> in
+          <span id="adviceIncomePeriod">August</span>
+        </h4>
+
+        <p class="advice-total-label income">TOTAL:</p>
+        <p id="advice-income-total" class="advice-total-value income">Rp0</p>
+
+        <p id="advice-income-text" class="advice-comment">
+          <span id="advice-income-arrow" class="advice-arrow up">▲</span>
+          <span id="advice-income-change">Your total income increased by 0% compared to last period.</span>
+        </p>
+
+        <div class="advice-chart-row">
+          <div class="advice-chart-wrapper">
+            <canvas id="adviceIncomeChart"></canvas>
           </div>
+          <ul id="advice-income-legend" class="advice-legend"></ul>
+        </div>
+      </div>
 
-          <!-- DONUT: EXPENSE -->
-          <div class="advice-block">
-            <h4 class="advice-heading">
-              Here’s What You’ve <span class="spent-text">Spent</span> in
-              <span id="adviceExpensePeriod">August</span>
-            </h4>
-            <p class="advice-total-label expense">TOTAL:</p>
-            <p id="advice-expense-total" class="advice-total-value expense">Rp0</p>
-            <p id="advice-expense-text" class="advice-comment">
-              <span id="advice-expense-arrow" class="advice-arrow down">▼</span>
-              <span id="advice-expense-change">Your total expense increased by 0% compared to last period.</span>
-            </p>
+      <!-- DONUT EXPENSE -->
+      <div class="advice-block">
+        <h4 class="advice-heading">
+          Here’s What You’ve <span class="spent-text">Spent</span> in
+          <span id="adviceExpensePeriod">August</span>
+        </h4>
 
-            <div class="advice-chart-row">
-              <div class="advice-chart-wrapper">
-                <canvas id="adviceExpenseChart"></canvas>
-              </div>
-              <ul id="advice-expense-legend" class="advice-legend"></ul>
-            </div>
+        <p class="advice-total-label expense">TOTAL:</p>
+        <p id="advice-expense-total" class="advice-total-value expense">Rp0</p>
+
+        <p id="advice-expense-text" class="advice-comment">
+          <span id="advice-expense-arrow" class="advice-arrow down">▼</span>
+          <span id="advice-expense-change">Your total expense increased by 0% compared to last period.</span>
+        </p>
+
+        <div class="advice-chart-row">
+          <div class="advice-chart-wrapper">
+            <canvas id="adviceExpenseChart"></canvas>
           </div>
+          <ul id="advice-expense-legend" class="advice-legend"></ul>
+        </div>
+      </div>
 
-        </section>
-      </section>
+    </div> <!-- END advice-section -->
 
-      <!-- FAQ -->
+  </div> <!-- END analyze-layout -->
+
+</section>
+
+      <!-- ===================== FAQ ===================== -->
       <section id="page-faq" class="page-section">
         <h2>Frequently Asked Questions</h2>
         <div class="faq-container">
@@ -207,27 +223,45 @@
         </div>
       </section>
 
-    </article>
+    </article> <!-- END MAIN CONTENT -->
 
-    <!-- === MODALS & OVERLAYS (unchanged) === -->
+
+    <!-- ============================================================
+         TRANSACTION ENTRY OVERLAY
+    ============================================================ -->
     <div id="page-tx" class="tx-page-overlay">
       <div class="tx-page-content">
+
         <header class="tx-page-header">
           <button id="btn-back-to-home" class="tx-page-back-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
           </button>
+
           <h2 id="tx-page-title" class="tx-page-title">Add Transaction</h2>
+
           <button id="btn-delete-tx" class="tx-page-delete-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6
+                       m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
           </button>
         </header>
 
+
         <div class="tx-page-form-container">
+
+          <!-- TYPE TOGGLE -->
           <div class="tx-type-toggle">
             <button id="btn-tx-type-income" class="tx-type-btn">Income</button>
             <button id="btn-tx-type-expense" class="tx-type-btn">Expense</button>
           </div>
 
+          <!-- DATE & TIME -->
           <div class="datetime-inputs">
             <button id="btn-open-datepicker" class="datetime-btn">
               <span id="tx-date-display">Select Date</span>
@@ -237,7 +271,9 @@
             </button>
           </div>
 
+          <!-- FORM INPUTS -->
           <div class="form-inputs">
+
             <div class="form-input-group">
               <label for="tx-amount">Amount</label>
               <div class="amount-input-wrapper">
@@ -255,6 +291,7 @@
               <label for="tx-payment">Payment Method</label>
               <input type="text" id="tx-payment" placeholder="Select payment method" readonly />
             </div>
+
           </div>
         </div>
 
@@ -264,7 +301,11 @@
       </div>
     </div>
 
-    <!-- ALERT -->
+
+
+    <!-- ============================================================
+         ALERT MODAL
+    ============================================================ -->
     <div id="alert-modal" class="modal-backdrop hidden">
       <div class="modal-content-alert">
         <h3 id="alert-title">Alert</h3>
@@ -273,7 +314,11 @@
       </div>
     </div>
 
-    <!-- CATEGORY MODAL -->
+
+
+    <!-- ============================================================
+         CATEGORY MODAL
+    ============================================================ -->
     <div id="category-modal" class="modal-backdrop hidden">
       <div id="category-modal-content" class="modal-content-sheet">
         <div class="modal-sheet-header">
@@ -284,7 +329,11 @@
       </div>
     </div>
 
-    <!-- PAYMENT MODAL -->
+
+
+    <!-- ============================================================
+         PAYMENT MODAL
+    ============================================================ -->
     <div id="payment-modal" class="modal-backdrop hidden">
       <div id="payment-modal-content" class="modal-content-sheet">
         <div class="modal-sheet-header">
@@ -295,47 +344,72 @@
       </div>
     </div>
 
-    <!-- DATEPICKER -->
+
+
+    <!-- ============================================================
+         DATEPICKER
+    ============================================================ -->
     <div id="datepicker-modal" class="modal-backdrop hidden">
       <div class="modal-content-datepicker">
+
         <div class="datepicker-header">
           <button id="datepicker-prev-month">&lt;</button>
           <div id="datepicker-month-year">Month Year</div>
           <button id="datepicker-next-month">&gt;</button>
         </div>
+
         <div class="datepicker-weekdays">
-          <div>SEN</div><div>SEL</div><div>RAB</div><div>KAM</div><div>JUM</div><div>SAB</div><div>MIN</div>
+          <div>SEN</div>
+          <div>SEL</div>
+          <div>RAB</div>
+          <div>KAM</div>
+          <div>JUM</div>
+          <div>SAB</div>
+          <div>MIN</div>
         </div>
+
         <div id="datepicker-days-grid" class="datepicker-days-grid"></div>
+
       </div>
     </div>
 
-    <!-- TIMEPICKER -->
+
+
+    <!-- ============================================================
+         TIME PICKER
+    ============================================================ -->
     <div id="timepicker-modal" class="modal-backdrop hidden">
       <div class="modal-content-timepicker">
         <h3 class="timepicker-title">Time Picker</h3>
+
         <div class="timepicker-controls">
           <div class="timepicker-column">
             <button id="time-hour-up" class="timepicker-btn">^</button>
             <span id="time-hour-display">12</span>
             <button id="time-hour-down" class="timepicker-btn">v</button>
           </div>
+
           <span class="timepicker-separator">:</span>
+
           <div class="timepicker-column">
             <button id="time-minute-up" class="timepicker-btn">^</button>
             <span id="time-minute-display">00</span>
             <button id="time-minute-down" class="timepicker-btn">v</button>
           </div>
+
           <div class="timepicker-ampm">
             <button id="time-ampm-am">AM</button>
             <button id="time-ampm-pm">PM</button>
           </div>
         </div>
+
         <button id="btn-set-time" class="modal-set-btn">Set Time</button>
       </div>
     </div>
-
-    <!-- SCRIPTS -->
+    
+    <!-- ============================================================
+         SCRIPTS
+    ============================================================ -->
     <script type="module" src="scripts/main.js"></script>
     <script src="scripts/templates.js"></script>
     <script src="scripts/navigation.js"></script>
