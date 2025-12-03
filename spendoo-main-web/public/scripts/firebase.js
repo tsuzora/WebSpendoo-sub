@@ -3,7 +3,6 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth
 import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Konfigurasi ini diambil dari file google-services.json dan info Anda
-// Pastikan Anda menggunakan API Key yang benar untuk Web
 const firebaseConfig = {
     apiKey: "AIzaSyDz_ovjG8Y78Y-fN8cxUDb0bVmJuhwDOEY", // API Key dari file firebase.js Anda
     authDomain: "spendoo-888.firebaseapp.com",
