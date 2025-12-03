@@ -622,7 +622,7 @@ async function saveTransaction() {
     const response = await fetch(`${BASE_URL}/api/transactions`, {
       method: "POST",
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -659,10 +659,13 @@ async function deleteTransaction() {
     btnDeleteTx.disabled = true;
     const token = await auth.currentUser.getIdToken();
 
-    const response = await fetch(`${BASE_URL}/api/transactions/?id=${currentTxIdToEdit}`, {
-      method: "DELETE",
-      headers: { Authorization: token },
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/transactions/?id=${currentTxIdToEdit}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     if (!response.ok) throw new Error("Delete failed");
 
