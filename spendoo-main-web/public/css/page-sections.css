@@ -393,6 +393,158 @@
   }
 }
 
+/* ===== GRADE SUMMARY CARD (EXCELLENT, AVERAGE, DLL) ===== */
+
+.grade-summary-card {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #f9fafb;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+}
+
+.grade-icon-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+}
+
+.grade-summary-title {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.grade-summary-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.grade-tagline {
+  font-weight: 700;
+}
+
+/* variasi warna grade */
+.grade-excellent {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+.grade-looking-good {
+  background: linear-gradient(135deg, #22c55e, #65a30d);
+}
+
+.grade-average {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.grade-not-good {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+}
+
+.grade-fatal {
+  background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+}
+
+/* ===== LIST CARD ADVICE DETAIL (SALARY, INVESTMENT, DLL) ===== */
+
+.adv-detail-title {
+  margin: 20px 0 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.adv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adv-item-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #4c1d95, #2563eb);
+  color: #f9fafb;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.adv-item-card.adv-income {
+  background: linear-gradient(135deg, #22c55e, #4ade80);
+}
+
+.adv-item-card.adv-expense {
+  background: linear-gradient(135deg, #fb7185, #f97316);
+}
+
+.adv-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.adv-item-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.adv-item-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.adv-item-desc {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.adv-drop {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #fecaca;
+  font-weight: 600;
+}
+
+.adv-drop .arrow {
+  color: #ef4444;
+}
+
+/* responsive: tumpuk vertikal di layar kecil */
+@media (max-width: 900px) {
+  .grade-summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .adv-item-card {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+}
+
 /* =========================================
    4. FAQ PAGE STYLES
    ========================================= */

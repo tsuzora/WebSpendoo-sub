@@ -68,6 +68,14 @@ const adviceExpenseTextEl   = document.getElementById("advice-expense-text");
 const adviceIncomeLegendEl  = document.getElementById("advice-income-legend");
 const adviceExpenseLegendEl = document.getElementById("advice-expense-legend");
 
+const gradeSummaryCardEl    = document.getElementById("grade-summary-card");
+const gradeTitleEl          = document.getElementById("grade-title");
+const gradeTaglineEl        = document.getElementById("grade-tagline");
+const gradeDescriptionEl    = document.getElementById("grade-description");
+const detailedAdviceTitleEl = document.getElementById("detailed-advice-title");
+const detailedAdviceListEl  = document.getElementById("detailed-advice-list");
+
+
 
 // === MODIFIKASI: FUNGSI HELPER UNTUK KONVERSI BULAN ===
 /**
@@ -707,6 +715,146 @@ function buildAdviceLegend(containerEl, labels, colors) {
   `).join("");
 }
 
+// ===== GRADE SUMMARY & DETAIL ADVICE =====
+
+function renderGradeSummaryCard(totalIncome, totalExpense) {
+  if (!gradeSummaryCardEl) return;
+
+  const inc = totalIncome || 0;
+  const exp = totalExpense || 0;
+
+  // kalau sama sekali belum ada data, sembunyikan
+  if (inc === 0 && exp === 0) {
+    gradeSummaryCardEl.style.display = "none";
+    if (detailedAdviceTitleEl) detailedAdviceTitleEl.style.display = "none";
+    if (detailedAdviceListEl) detailedAdviceListEl.innerHTML = "";
+    return;
+  }
+
+  gradeSummaryCardEl.style.display = "grid";
+
+  const saving = inc - exp;
+  const savingRate = inc > 0 ? saving / inc : -1;
+
+  let gradeClass = "grade-excellent";
+  let label = "EXCELLENT!";
+  let tagline = "EXCELLENT";
+  let desc = "";
+
+  if (savingRate >= 0.30) {
+    gradeClass = "grade-excellent";
+    label = "EXCELLENT!";
+    tagline = "EXCELLENT";
+    desc = "You consistently spend far below your income and keep a very healthy saving rate.";
+  } else if (savingRate >= 0.15) {
+    gradeClass = "grade-looking-good";
+    label = "LOOKING GOOD!";
+    tagline = "LOOKING GOOD";
+    desc = "Your cash flow looks good. Keep maintaining this pattern to reach an excellent grade.";
+  } else if (savingRate >= 0.05) {
+    gradeClass = "grade-average";
+    label = "AVERAGE";
+    tagline = "AVERAGE";
+    desc = "Your finances are still safe, but there is room to improve your savings and cut non-essential expenses.";
+  } else if (savingRate >= 0) {
+    gradeClass = "grade-not-good";
+    label = "NOT SO GOOD";
+    tagline = "NOT SO GOOD";
+    desc = "Your expenses almost match your income. Try to reduce discretionary spending and build a buffer.";
+  } else {
+    gradeClass = "grade-fatal";
+    label = "FATAL";
+    tagline = "FATAL";
+    desc = "Your expenses are higher than your income. You need an emergency plan to reduce spending or increase income.";
+  }
+
+  // bersihkan kelas lama
+  gradeSummaryCardEl.classList.remove(
+    "grade-excellent",
+    "grade-looking-good",
+    "grade-average",
+    "grade-not-good",
+    "grade-fatal"
+  );
+  gradeSummaryCardEl.classList.add(gradeClass);
+
+  if (gradeTitleEl) gradeTitleEl.textContent = label;
+  if (gradeTaglineEl) gradeTaglineEl.textContent = tagline;
+  if (gradeDescriptionEl) gradeDescriptionEl.textContent =
+    "From the statistics, we’ve analyzed and graded your cash flow. " + desc;
+}
+
+function buildCategoryDropAdvices(aggCurrent, aggPrev) {
+  if (!aggCurrent || !aggPrev) return [];
+
+  const currentMap = {};
+  const prevMap = {};
+
+  aggCurrent.labels.forEach((label, idx) => {
+    currentMap[label] = aggCurrent.data[idx] || 0;
+  });
+  aggPrev.labels.forEach((label, idx) => {
+    prevMap[label] = aggPrev.data[idx] || 0;
+  });
+
+  const items = [];
+
+  Object.keys(prevMap).forEach(label => {
+    const before = prevMap[label];
+    const now = currentMap[label] || 0;
+    if (before > 0 && now < before) {
+      const dropPct = ((before - now) / before) * 100;
+      if (dropPct < 3) return; // abaikan perubahan kecil
+
+      items.push({
+        type: "income",
+        category: label,
+        dropPct,
+        message:
+          `Your ${label.toLowerCase()} income dropped by ${dropPct.toFixed(1)}%. ` +
+          "Review this cash flow and consider how to stabilise or increase it again."
+      });
+    }
+  });
+
+  // sort dari drop terbesar, ambil 3 teratas
+  items.sort((a, b) => b.dropPct - a.dropPct);
+  return items.slice(0, 3);
+}
+
+function renderDetailedAdviceCards(items) {
+  if (!detailedAdviceListEl || !detailedAdviceTitleEl) return;
+
+  detailedAdviceListEl.innerHTML = "";
+
+  if (!items || items.length === 0) {
+    detailedAdviceTitleEl.style.display = "none";
+    return;
+  }
+
+  detailedAdviceTitleEl.style.display = "block";
+
+  items.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "adv-item-card " + (item.type === "expense" ? "adv-expense" : "adv-income");
+    card.innerHTML = `
+      <div class="adv-icon-box">
+        <span>💼</span>
+      </div>
+      <div class="adv-item-main">
+        <p class="adv-item-title">${item.category}</p>
+        <p class="adv-item-desc">${item.message}</p>
+      </div>
+      <div class="adv-drop">
+        <span class="arrow">▼</span>
+        <span>${item.dropPct.toFixed(0)}%</span>
+      </div>
+    `;
+    detailedAdviceListEl.appendChild(card);
+  });
+}
+
+
 function refreshAdviceSection() {
   if (!transactions || transactions.length === 0) {
     // kalau tidak ada data, biarkan teks default
@@ -815,12 +963,19 @@ function refreshAdviceSection() {
   }
 
   // render donut expense
+    // render donut expense
   if (adviceExpenseChart) adviceExpenseChart.destroy();
   const expenseResult = drawAdviceDonut("adviceExpenseChart", aggExp.labels, aggExp.data, false);
   if (expenseResult && adviceExpenseLegendEl) {
     buildAdviceLegend(adviceExpenseLegendEl, aggExp.labels, expenseResult.colors);
     adviceExpenseChart = expenseResult.chart;
   }
+
+  // ===== GRADE SUMMARY + DETAIL ADVICE (NEW) =====
+  renderGradeSummaryCard(aggInc.total, aggExp.total);
+
+  const dropAdviceItems = buildCategoryDropAdvices(aggInc, aggIncPrev);
+  renderDetailedAdviceCards(dropAdviceItems);
 }
 
 function drawFinancialChart(labels, incomeData, expenseData, title) {

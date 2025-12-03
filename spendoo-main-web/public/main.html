@@ -154,61 +154,83 @@
 </div>
 
       <!-- ===================== ADVICE SECTION ===================== -->
-      <div class="advice-section">
-        <h3 class="advice-title">Advice</h3>
+      <section class="advice-section">
+  <h3 class="advice-title">Advice</h3>
 
-        <!-- INCOME BLOCK -->
-        <div class="advice-block income">
-          <p class="advice-heading">
-            Here's what you've <span class="gain-text">Gained</span> in
-            <span id="advice-income-period">August</span>
-          </p>
-
-          <p class="advice-total-label income">TOTAL:</p>
-          <p class="advice-total-value income" id="advice-income-total">Rp0</p>
-
-          <p class="advice-comment" id="advice-income-comment">
-            <span class="advice-arrow" id="advice-income-arrow">▲</span>
-            <span id="advice-income-text">
-              Your total income has no previous data to compare.
-            </span>
-          </p>
-
-          <div class="advice-chart-row">
-            <div class="advice-chart-wrapper">
-              <canvas id="adviceIncomeChart"></canvas>
-            </div>
-            <ul class="advice-legend" id="advice-income-legend"></ul>
-          </div>
-        </div>
-
-        <!-- EXPENSE BLOCK -->
-        <div class="advice-block expense">
-          <p class="advice-heading">
-            Here's what you've <span class="spent-text">Spent</span> in
-            <span id="advice-expense-period">August</span>
-          </p>
-
-          <p class="advice-total-label expense">TOTAL:</p>
-          <p class="advice-total-value expense" id="advice-expense-total">Rp0</p>
-
-          <p class="advice-comment" id="advice-expense-comment">
-            <span class="advice-arrow" id="advice-expense-arrow">▲</span>
-            <span id="advice-expense-text">
-              Your total spending has no previous data to compare.
-            </span>
-          </p>
-
-          <div class="advice-chart-row">
-            <div class="advice-chart-wrapper">
-              <canvas id="adviceExpenseChart"></canvas>
-            </div>
-            <ul class="advice-legend" id="advice-expense-legend"></ul>
-          </div>
-        </div>
-      </div>
-      <!-- =================== END ADVICE SECTION =================== -->
+  <!-- BLOK DONUT "GAINED" -->
+  <div class="advice-block">
+    <div class="advice-block-header">
+      <h4 class="advice-heading">
+        Here’s What You’ve <span class="gain-text">Gained</span> in
+        <span id="adviceIncomePeriod">August</span>
+      </h4>
+      <p class="advice-total-label income">TOTAL:</p>
+      <p id="advice-income-total" class="advice-total-value income">Rp0</p>
+      <p id="advice-income-text" class="advice-comment">
+        <span id="advice-income-arrow" class="advice-arrow up">▲</span>
+        <span id="advice-income-change">Your total income increased by 0% compared to last period.</span>
+      </p>
     </div>
+
+    <div class="advice-chart-row">
+      <div class="advice-chart-wrapper">
+        <canvas id="adviceIncomeChart"></canvas>
+      </div>
+      <ul id="advice-income-legend" class="advice-legend">
+        <!-- legend diisi via JS -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- BLOK DONUT "SPENT" -->
+  <div class="advice-block">
+    <div class="advice-block-header">
+      <h4 class="advice-heading">
+        Here’s What You’ve <span class="spent-text">Spent</span> in
+        <span id="adviceExpensePeriod">August</span>
+      </h4>
+      <p class="advice-total-label expense">TOTAL:</p>
+      <p id="advice-expense-total" class="advice-total-value expense">Rp0</p>
+      <p id="advice-expense-text" class="advice-comment">
+        <span id="advice-expense-arrow" class="advice-arrow down">▼</span>
+        <span id="advice-expense-change">Your total expense increased by 0% compared to last period.</span>
+      </p>
+    </div>
+
+    <div class="advice-chart-row">
+      <div class="advice-chart-wrapper">
+        <canvas id="adviceExpenseChart"></canvas>
+      </div>
+      <ul id="advice-expense-legend" class="advice-legend">
+        <!-- legend diisi via JS -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- ====== GRADE SUMMARY CARD (EXCELLENT, AVERAGE, DLL) ====== -->
+  <div id="grade-summary-card"
+       class="grade-summary-card grade-excellent"
+       style="display:none;">
+    <div class="grade-icon-box">
+      🏆
+    </div>
+    <div class="grade-summary-text">
+      <p id="grade-title" class="grade-summary-title">EXCELLENT!</p>
+      <p id="grade-description" class="grade-summary-subtitle">
+        From the statistics, we’ve analyzed and graded your cash flow.
+        Your statistics are <span id="grade-tagline" class="grade-tagline">EXCELLENT</span>.
+      </p>
+    </div>
+  </div>
+
+  <!-- TITLE UNTUK LIST ADVICE DETAIL (muncul kalau ada item) -->
+  <p id="detailed-advice-title" class="adv-detail-title" style="display:none;">
+    Here are some advice that you could use!
+  </p>
+
+  <!-- LIST CARD ADVICE PER KATEGORI (SALARY, INVESTMENT, DLL) -->
+  <div id="detailed-advice-list" class="adv-list">
+    <!-- card-card advice akan di-inject JS -->
   </div>
 </section>
 
