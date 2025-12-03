@@ -2,6 +2,7 @@ import {
   onAuthStateChanged,
   signOut,
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/+esm";
 // Impor 'db' dan fungsi firestore
 import { auth } from "./firebase.js";
 // import {
@@ -14,6 +15,33 @@ import { auth } from "./firebase.js";
 //   query,
 //   Timestamp, // Pastikan Timestamp diimpor
 // } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// Warna Kategori (Sesuai Screenshot/Tema)
+const CAT_COLORS = {
+    'Salary': '#2ecc71', 'Allowance': '#f1c40f', 
+    'Investment': '#9b59b6', 'Bonus': '#e91e63',
+    'Business': '#3498db', 'Fund': '#e74c3c',
+    'Honorarium': '#1abc9c', 'Royalty': '#95a5a6',
+    'Electronics': '#e67e22', 'Energy': '#f1c40f',
+    'Groceries': '#e74c3c', 'Internet': '#9b59b6',
+    'Education': '#3498db', 'Furniture': '#e91e63',
+    'Clothes': '#1abc9c', 'Transport': '#7f8c8d',
+    'Others': '#34495e', 'Food': '#d35400', 'Bills': '#c0392b'
+};
+
+// === KAMUS SARAN (ADVICE DICTIONARY) ===
+const ADVICE_MESSAGES = {
+    'Salary': "Income dropped. Check your payroll or work hours.",
+    'Investment': "Returns decreased. Re-evaluate your portfolio strategy.",
+    'Business': "Revenue is down. Try boosting promotions or sales.",
+    'Food': "Food spending spiked! Try cooking at home more often.",
+    'Transport': "Transport costs rose. Consider carpooling or public transit.",
+    'Shopping': "Shopping is high. Differentiate needs vs wants.",
+    'Entertainment': "Fun costs went up. Look for free local events.",
+    'Bills': "Bills are higher. Check for energy leaks or subscriptions.",
+    // Default fallback
+    'default_expense': "This expense increased noticeably. Review your transactions.",
+    'default_income': "This income source decreased. Monitor it closely."
+};
 
 // === VARIABEL GLOBAL & STATE ===
 let currentUserId = null;
@@ -23,6 +51,8 @@ let currentTxType = "expense"; // 'income' or 'expense'
 let currentTxDate = new Date();
 let currentDatePickerDate = new Date(); // Untuk navigasi kalender
 let unsubscribeFromFirestore = null; // Untuk menyimpan fungsi unsub
+let currentFilter = 'all'; // Options: 'all', 'income', 'expense'
+let currentSort = 'date';  // Options: 'date', 'category'
 
 // === MODIFIKASI: FUNGSI HELPER UNTUK KONVERSI BULAN ===
 /**
@@ -234,7 +264,7 @@ function renderHomeTable() {
   container.innerHTML = "";
 
   // Optional: Limit to recent 10 transactions
-  const recentTransactions = transactions.slice(0, 10);
+  const recentTransactions = getProcessedTransactions()
 
   if (recentTransactions.length === 0) {
     container.innerHTML = `<div style="padding:20px; text-align:center; color:#888;">No recent activity.</div>`;
@@ -276,9 +306,7 @@ function renderHomeTable() {
          <span style="font-size:24px">${tx.category}</span>
       </div>
       
-      <div id="cell-amount" role="gridcell" style="color: ${
-        tx.type === "income" ? "#2ecc71" : "#e74c3c"
-      }">
+      <div id="cell-amount" role="gridcell" style="color:#fff">
          ${tx.type === "expense" ? "-" : "+"} Rp${amountStr}
       </div>
       
@@ -869,6 +897,57 @@ function formatTime(date) {
 }
 
 document.body.addEventListener("click", (e) => {
+  const btnFilterIncome = document.getElementById("filter-income-btn");
+  if (btnFilterIncome) {
+    btnFilterIncome.addEventListener("click", () => {
+      // Toggle: If already 'income', switch back to 'all'
+      if (currentFilter === "income") {
+        currentFilter = "all";
+        btnFilterIncome.classList.remove("active");
+      } else {
+        currentFilter = "income";
+        // Reset other buttons
+        btnFilterIncome.classList.add("active");
+        document
+          .getElementById("filter-expense-btn")
+          .classList.remove("active");
+      }
+      renderHomeTable(); // Re-render table
+    });
+  }
+
+  // 2. Expense Filter
+  const btnFilterExpense = document.getElementById("filter-expense-btn");
+  if (btnFilterExpense) {
+    btnFilterExpense.addEventListener("click", () => {
+      // Toggle
+      if (currentFilter === "expense") {
+        currentFilter = "all";
+        btnFilterExpense.classList.remove("active");
+      } else {
+        currentFilter = "expense";
+        btnFilterExpense.classList.add("active");
+        document.getElementById("filter-income-btn").classList.remove("active");
+      }
+      renderHomeTable();
+    });
+  }
+
+  // 3. Category Sort
+  const btnFilterCat = document.getElementById("filter-cat-btn");
+  if (btnFilterCat) {
+    btnFilterCat.addEventListener("click", () => {
+      // Toggle Sort Mode
+      if (currentSort === "category") {
+        currentSort = "date";
+        btnFilterCat.classList.remove("active");
+      } else {
+        currentSort = "category";
+        btnFilterCat.classList.add("active");
+      }
+      renderHomeTable();
+    });
+  }
   const fabBtn =
     e.target.closest(".fab-add") || e.target.closest("#fab-add-tx");
   if (fabBtn) {
@@ -1042,3 +1121,658 @@ document.addEventListener("click", (e) => {
     container.classList.remove("active");
   }
 });
+
+// === HELPER: Filter & Sort Data ===
+function getProcessedTransactions() {
+  // 1. Create a copy of the array
+  let processed = [...transactions];
+
+  // 2. Apply Filter (Income/Expense)
+  if (currentFilter !== 'all') {
+    processed = processed.filter(tx => tx.type === currentFilter);
+  }
+
+  // 3. Apply Sort (Date vs Category)
+  if (currentSort === 'category') {
+    // Sort A-Z by Category Name
+    processed.sort((a, b) => a.category.localeCompare(b.category));
+  } else {
+    // Default: Sort by Date (Newest first)
+    processed.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  return processed;
+}
+// === VARIABEL GLOBAL CHART ===
+let financialChartInstance = null;
+let analyzeViewMode = 'monthly'; // 'monthly' or 'yearly'
+let analyzeDate = new Date(); // Tanggal yang sedang dilihat di Analyze
+
+// === FUNGSI LOGIKA CHART ===
+
+function initChartPage() {
+    renderChartControls();
+    updateChartData();
+}
+
+// 1. Render Teks Periode (Ex: "August 2025" atau "2025")
+function renderChartControls() {
+    const label = document.getElementById('chart-period-label');
+    const btnMonthly = document.getElementById('btn-view-monthly');
+    const btnYearly = document.getElementById('btn-view-yearly');
+
+    if (!label) return;
+
+    if (analyzeViewMode === 'monthly') {
+        // Tampilkan Bulan & Tahun
+        label.textContent = formatDate(analyzeDate, { month: 'long', year: 'numeric' });
+        btnMonthly.classList.add('active');
+        btnYearly.classList.remove('active');
+    } else {
+        // Tampilkan Tahun saja
+        label.textContent = analyzeDate.getFullYear();
+        btnYearly.classList.add('active');
+        btnMonthly.classList.remove('active');
+    }
+}
+// === FUNGSI YANG HILANG: MENGGAMBAR CHART UTAMA ===
+// === VERSI AMAN: RENDER CHART ===
+function renderCanvasChart(labels, incomeData, expenseData) {
+    const ctx = document.getElementById('financialChart');
+    
+    // Cek 1: Apakah elemen canvas ada di HTML?
+    if (!ctx) {
+        console.error("Canvas element #financialChart not found!");
+        return;
+    }
+
+    // Cek 2: Apakah library Chart.js sudah termuat?
+    if (typeof Chart === 'undefined') {
+        console.error("Chart.js library not loaded yet.");
+        return;
+    }
+
+    // Hapus chart lama jika ada
+    if (financialChartInstance) {
+        financialChartInstance.destroy();
+    }
+
+    // GUNAKAN TRY-CATCH AGAR TIDAK MEMATIKAN FUNGSI LAIN JIKA ERROR
+    try {
+        financialChartInstance = new Chart(ctx, {
+            type: 'bar', 
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: incomeData,
+                        backgroundColor: '#2ecc71',
+                        borderColor: '#2ecc71',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    },
+                    {
+                        label: 'Expense',
+                        data: expenseData,
+                        backgroundColor: '#e74c3c',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Penting agar menyesuaikan CSS height
+                scales: {
+                    x: { ticks: { color: '#aebdb4' }, grid: { display: false } },
+                    y: { ticks: { color: '#aebdb4' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        });
+        console.log("Chart rendered successfully!");
+    } catch (error) {
+        console.error("Gagal menggambar chart:", error);
+        // Script akan lanjut jalan ke bawah (update breakdown) meskipun chart error
+    }
+}
+
+// 2. Olah Data & Render Chart
+// === UPDATE: LOGIKA CHART DENGAN EMPTY STATE ===
+function updateChartData() {
+  const canvasContainer = document.getElementById("chart-canvas-container");
+  const emptyStateContainer = document.getElementById("chart-empty-state");
+  const emptyTitle = document.getElementById("empty-state-title");
+  const emptyDesc = document.getElementById("empty-state-desc");
+
+  // Elemen tambahan
+  const breakdownSection = document.getElementById("breakdown-section");
+  const adviceSection = document.getElementById("advice-section");
+
+  if (!canvasContainer || !emptyStateContainer) return;
+
+  // 1. SIAPKAN DATA
+  let labels = [];
+  let incomeData = [];
+  let expenseData = [];
+  let totalDataCount = 0;
+
+  const validTx = transactions;
+
+  if (analyzeViewMode === "monthly") {
+    const year = analyzeDate.getFullYear();
+    const month = analyzeDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    incomeData = new Array(daysInMonth).fill(0);
+    expenseData = new Array(daysInMonth).fill(0);
+
+    validTx.forEach((tx) => {
+      const txDate = new Date(tx.date);
+      if (txDate.getFullYear() === year && txDate.getMonth() === month) {
+        const dayIndex = txDate.getDate() - 1;
+        // [PENTING] Gunakan Number() agar tidak dianggap teks
+        const amount = Number(tx.amount) || 0;
+
+        if (tx.type === "income") incomeData[dayIndex] += amount;
+        else expenseData[dayIndex] += amount;
+
+        totalDataCount++;
+      }
+    });
+  } else {
+    const year = analyzeDate.getFullYear();
+    labels = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    incomeData = new Array(12).fill(0);
+    expenseData = new Array(12).fill(0);
+
+    validTx.forEach((tx) => {
+      const txDate = new Date(tx.date);
+      if (txDate.getFullYear() === year) {
+        const monthIndex = txDate.getMonth();
+        const amount = Number(tx.amount) || 0;
+
+        if (tx.type === "income") incomeData[monthIndex] += amount;
+        else expenseData[monthIndex] += amount;
+        totalDataCount++;
+      }
+    });
+  }
+
+  // 2. TENTUKAN TAMPILAN
+  if (totalDataCount === 0) {
+    // === KOSONG ===
+    canvasContainer.classList.add("hidden");
+    if (breakdownSection) breakdownSection.classList.add("hidden"); // Sembunyikan Donut
+    if (adviceSection) adviceSection.classList.add("hidden"); // Sembunyikan Advice
+
+    if (financialChartInstance) {
+      financialChartInstance.destroy();
+      financialChartInstance = null;
+    }
+
+    emptyStateContainer.classList.remove("hidden");
+
+    if (analyzeViewMode === "monthly") {
+      const monthName = formatDate(analyzeDate, { month: "long" });
+      emptyTitle.textContent = `No Transactions in ${monthName}`;
+      emptyDesc.textContent = `There's no transaction yet for this month!`;
+    } else {
+      const yearNum = analyzeDate.getFullYear();
+      emptyTitle.textContent = `No Transactions in ${yearNum}`;
+      emptyDesc.textContent = `There's no transaction yet for this year!`;
+    }
+
+    canvasContainer.style.display = "none";
+    emptyStateContainer.style.display = "flex";
+  } else {
+    // === ADA DATA ===
+    emptyStateContainer.classList.add("hidden");
+    canvasContainer.classList.remove("hidden");
+    emptyStateContainer.style.display = "none";
+    canvasContainer.style.display = "block";
+
+    // Render Chart
+    renderCanvasChart(labels, incomeData, expenseData);
+
+    // Render Donut & Total
+    if (typeof updateBreakdownSection === "function") {
+      updateBreakdownSection();
+    }
+
+    // Render Advice (Hitung total dulu)
+    const totalIncome = incomeData.reduce((a, b) => a + b, 0);
+    const totalExpense = expenseData.reduce((a, b) => a + b, 0);
+
+    // Panggil fungsi Advice (Pastikan fungsinya sudah dibuat di bawah)
+    if (typeof updateAdviceSection === "function") {
+      updateAdviceSection(totalIncome, totalExpense);
+    }
+  }
+}
+
+// === EVENT LISTENER KHUSUS ANALYZE PAGE ===
+// Tambahkan ini di bagian bawah, di dalam event listener document click yang sudah ada atau buat baru
+
+document.body.addEventListener('click', (e) => {
+    // 1. Toggle Monthly
+    if (e.target.id === 'btn-view-monthly') {
+        analyzeViewMode = 'monthly';
+        analyzeDate = new Date(); // Reset ke hari ini
+        initChartPage();
+    }
+    // 2. Toggle Yearly
+    if (e.target.id === 'btn-view-yearly') {
+        analyzeViewMode = 'yearly';
+        analyzeDate = new Date(); // Reset ke tahun ini
+        initChartPage();
+    }
+
+    // 3. Navigasi Previous (<)
+    if (e.target.closest('#btn-chart-prev')) {
+        if (analyzeViewMode === 'monthly') {
+            analyzeDate.setMonth(analyzeDate.getMonth() - 1);
+        } else {
+            analyzeDate.setFullYear(analyzeDate.getFullYear() - 1);
+        }
+        initChartPage();
+    }
+
+    // 4. Navigasi Next (>)
+    if (e.target.closest('#btn-chart-next')) {
+        if (analyzeViewMode === 'monthly') {
+            analyzeDate.setMonth(analyzeDate.getMonth() + 1);
+        } else {
+            analyzeDate.setFullYear(analyzeDate.getFullYear() + 1);
+        }
+        initChartPage();
+    }
+});
+
+// MODIFIKASI NAV LINK: Saat klik menu "Analyze", render chartnya
+const analyzeLink = document.querySelector('.nav-link[data-target="analyze"]');
+if (analyzeLink) {
+    analyzeLink.addEventListener('click', () => {
+        // Beri sedikit delay agar section aktif dulu (display block) baru chart dirender
+        setTimeout(() => {
+            initChartPage();
+        }, 100);
+    });
+}
+
+// === LOGIKA BREAKDOWN (DONUT & COMPARISON) ===
+
+let incomeChartInstance = null;
+let expenseChartInstance = null;
+
+function updateBreakdownSection() {
+    const breakdownSection = document.getElementById('breakdown-section');
+    const periodNameEls = document.querySelectorAll('.period-name');
+    
+    // Jika tidak ada data chart utama, sembunyikan juga breakdown ini
+    breakdownSection.classList.remove('hidden');
+
+    // 1. Update Nama Periode (August / 2025)
+    const currentPeriodName = analyzeViewMode === 'monthly' 
+        ? formatDate(analyzeDate, { month: 'long' }) 
+        : analyzeDate.getFullYear();
+    
+    periodNameEls.forEach(el => el.textContent = currentPeriodName);
+
+    // 2. Proses Data Income & Expense
+    processBreakdownData('income');
+    processBreakdownData('expense');
+}
+
+function processBreakdownData(type) {
+    // A. Filter Data Saat Ini
+    const currentData = getTransactionsByPeriod(analyzeDate, type);
+    const totalCurrent = currentData.reduce((sum, t) => sum + t.amount, 0);
+
+    // B. Filter Data Sebelumnya (Previous) untuk Komparasi
+    let prevDate = new Date(analyzeDate);
+    if (analyzeViewMode === 'monthly') {
+        prevDate.setMonth(prevDate.getMonth() - 1);
+    } else {
+        prevDate.setFullYear(prevDate.getFullYear() - 1);
+    }
+    const prevData = getTransactionsByPeriod(prevDate, type);
+    const totalPrev = prevData.reduce((sum, t) => sum + t.amount, 0);
+
+    // C. Hitung Persentase Perubahan
+    let percentage = 0;
+    if (totalPrev > 0) {
+        percentage = ((totalCurrent - totalPrev) / totalPrev) * 100;
+    } else if (totalCurrent > 0) {
+        percentage = 100; // Jika sebelumnya 0 dan sekarang ada, anggap naik 100%
+    }
+
+    // D. Update Text UI
+    const totalDisplay = document.getElementById(`${type}-total-display`);
+    const compText = document.getElementById(`${type}-comparison`);
+    
+    totalDisplay.textContent = `Rp${formatCurrency(totalCurrent)}`;
+
+    const formattedPercent = Math.abs(percentage).toFixed(0);
+    const direction = percentage >= 0 ? 'increased' : 'decreased';
+    const arrow = percentage >= 0 ? '▲' : '▼';
+    const colorClass = percentage >= 0 ? 'up' : 'down';
+    const prevPeriodName = analyzeViewMode === 'monthly' 
+        ? formatDate(prevDate, { month: 'long' }) 
+        : prevDate.getFullYear();
+
+    compText.className = `comparison-text ${colorClass}`;
+    compText.innerHTML = `<span class="arrow">${arrow}</span> Your total ${type} ${direction} by <b>${formattedPercent}%</b> compared to ${prevPeriodName}.`;
+
+    // E. Group by Category untuk Chart
+    const categoryMap = {};
+    currentData.forEach(tx => {
+        categoryMap[tx.category] = (categoryMap[tx.category] || 0) + tx.amount;
+    });
+
+    const labels = Object.keys(categoryMap);
+    const dataValues = Object.values(categoryMap);
+    const bgColors = labels.map(cat => CAT_COLORS[cat] || '#999');
+
+    // F. Render Donut Chart
+    renderDonut(type, labels, dataValues, bgColors);
+    
+    // G. Render Custom Legend
+    renderCustomLegend(type, labels, bgColors);
+}
+
+// Helper: Ambil transaksi berdasarkan periode aktif
+function getTransactionsByPeriod(dateObj, type) {
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth();
+    
+    return transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        const matchType = tx.type === type;
+        
+        if (analyzeViewMode === 'monthly') {
+            return matchType && txDate.getFullYear() === year && txDate.getMonth() === month;
+        } else {
+            return matchType && txDate.getFullYear() === year;
+        }
+    });
+}
+
+// === FIX: RENDER DONUT DENGAN AMAN ===
+function renderDonut(type, labels, data, colors) {
+    const canvasId = `${type}DonutChart`;
+    const ctx = document.getElementById(canvasId);
+    
+    // Cek elemen
+    if (!ctx) {
+        console.warn(`Canvas #${canvasId} tidak ditemukan.`);
+        return;
+    }
+
+    // Hapus chart lama agar tidak menumpuk (glitch saat hover)
+    if (type === 'income' && incomeChartInstance) {
+        incomeChartInstance.destroy();
+        incomeChartInstance = null;
+    }
+    if (type === 'expense' && expenseChartInstance) {
+        expenseChartInstance.destroy();
+        expenseChartInstance = null;
+    }
+
+    // Render Chart Baru
+    try {
+        const newChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Ini butuh CSS height yang sudah kita set
+                cutout: '70%', // Ketebalan donut
+                plugins: {
+                    legend: { display: false }, // Legend custom
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                 let val = new Intl.NumberFormat('id-ID').format(context.raw);
+                                 return ` ${context.label}: Rp${val}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Simpan instance ke variabel global
+        if (type === 'income') incomeChartInstance = newChart;
+        else expenseChartInstance = newChart;
+        
+    } catch (e) {
+        console.error(`Gagal render donut ${type}:`, e);
+    }
+}
+
+function renderCustomLegend(type, labels, colors) {
+    const container = document.getElementById(`${type}-legend`);
+    container.innerHTML = '';
+
+    labels.forEach((label, index) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `
+            <span class="legend-dot" style="background-color: ${colors[index]}"></span>
+            ${label}
+        `;
+        container.appendChild(item);
+    });
+}
+
+// === FUNGSI LOGIKA GRADE & ADVICE ===
+// === FUNGSI LOGIKA GRADE & ADVICE (YANG SEBELUMNYA HILANG) ===
+function updateAdviceSection(totalIncome, totalExpense) {
+    const adviceWrapper = document.getElementById('advice-section');
+    const gradeCard = document.getElementById('grade-card');
+    const gradeTitle = document.getElementById('grade-title');
+    const gradeDesc = document.getElementById('grade-desc');
+    const adviceGrid = document.getElementById('advice-grid');
+
+    if (!adviceWrapper) return; // Safety check
+
+    // Tampilkan Section
+    adviceWrapper.classList.remove('hidden');
+
+    // 1. HITUNG GRADE
+    let savingsRate = 0;
+    if (totalIncome > 0) {
+        savingsRate = (totalIncome - totalExpense) / totalIncome;
+    } else if (totalExpense > 0) {
+        savingsRate = -1; 
+    }
+
+    gradeCard.className = 'grade-card'; // Reset class
+    if (savingsRate >= 0.4) {
+        gradeCard.classList.add('excellent');
+        gradeTitle.textContent = "EXCELLENT!";
+        gradeDesc.textContent = "Outstanding! You saved over 40% of your income.";
+    } else if (savingsRate >= 0.2) {
+        gradeCard.classList.add('good');
+        gradeTitle.textContent = "GOOD JOB!";
+        gradeDesc.textContent = "You're doing well by saving over 20%.";
+    } else if (savingsRate >= 0) {
+        gradeCard.classList.add('fair');
+        gradeTitle.textContent = "FAIR";
+        gradeDesc.textContent = "You are breaking even. Try to save more.";
+    } else {
+        gradeCard.classList.add('poor');
+        gradeTitle.textContent = "NEEDS ATTENTION";
+        gradeDesc.textContent = "Warning! Expenses exceed income.";
+    }
+
+    // 2. GENERATE ADVICE
+    adviceGrid.innerHTML = '';
+    const currentCats = getCategorySums(analyzeDate);
+    
+    // Bandingkan dengan bulan lalu
+    let prevDate = new Date(analyzeDate);
+    if (analyzeViewMode === 'monthly') prevDate.setMonth(prevDate.getMonth() - 1);
+    else prevDate.setFullYear(prevDate.getFullYear() - 1);
+    
+    const prevCats = getCategorySums(prevDate);
+    let adviceCount = 0;
+
+    for (const [key, amount] of Object.entries(currentCats)) {
+        const [type, catName] = key.split('_');
+        const prevAmount = prevCats[key] || 0;
+        let percentChange = 0;
+
+        if (prevAmount > 0) percentChange = ((amount - prevAmount) / prevAmount) * 100;
+        else if (amount > 0) percentChange = 100;
+
+        let isBadTrend = false;
+        // Logic muncul saran: Expense naik > 10% ATAU Income turun > 5%
+        if (type === 'expense' && percentChange > 10 && amount > 50000) isBadTrend = true;
+        else if (type === 'income' && percentChange < -5) isBadTrend = true;
+
+        if (isBadTrend) {
+            adviceCount++;
+            let msg = ADVICE_MESSAGES[catName] || ADVICE_MESSAGES['default_expense'];
+            const indicatorColor = type === 'expense' ? '#e74c3c' : '#f1c40f';
+            
+            // Cari Icon
+            const catObj = CATEGORIES[type]?.find(c => c.name === catName);
+            const iconSvg = catObj ? catObj.icon : '⚠️';
+
+            const card = document.createElement('div');
+            card.className = 'advice-card';
+            card.style.borderLeftColor = indicatorColor;
+            card.innerHTML = `
+                <div class="advice-icon-box" style="color: ${indicatorColor}">${iconSvg}</div>
+                <div class="advice-details">
+                    <div class="advice-header">
+                        <span class="advice-cat-name">${catName}</span>
+                        <span class="advice-trend" style="color:${indicatorColor}">
+                            ${type === 'expense' ? '▲' : '▼'} ${Math.abs(percentChange).toFixed(0)}%
+                        </span>
+                    </div>
+                    <p class="advice-text">${msg}</p>
+                </div>
+            `;
+            adviceGrid.appendChild(card);
+        }
+    }
+    
+    // Jika tidak ada saran
+    if (adviceCount === 0) {
+        adviceGrid.innerHTML = `<div style="text-align:center; padding:20px; color:#fff;">No negative trends! Keep it up! 🎉</div>`;
+    }
+}
+
+// Helper: Hitung total per kategori untuk periode tertentu
+function getCategorySums(dateObj) {
+    const sums = {};
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth();
+
+    transactions.forEach(tx => {
+        const txDate = new Date(tx.date);
+        let match = false;
+        if (analyzeViewMode === 'monthly') {
+            match = (txDate.getFullYear() === year && txDate.getMonth() === month);
+        } else {
+            match = (txDate.getFullYear() === year);
+        }
+
+        if (match) {
+            const key = `${tx.type}_${tx.category}`;
+            sums[key] = (sums[key] || 0) + tx.amount;
+        }
+    });
+    return sums;
+}
+
+// === GENERATOR DATA DUMMY (UNTUK TESTING) ===
+function generateDummyData() {
+    console.log("Generating dummy data for December...");
+    
+    // Pastikan array transactions kosong dulu agar bersih
+    transactions = []; 
+
+    const categories = {
+        income: ['Salary', 'Bonus', 'Business', 'Investment'],
+        expense: ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment']
+    };
+
+    // Loop untuk 15 hari pertama di bulan Desember 2025
+    for (let i = 1; i <= 15; i++) {
+        // Random Tipe (Income / Expense)
+        const isExpense = Math.random() > 0.3; // 70% kemungkinan expense
+        const type = isExpense ? 'expense' : 'income';
+        
+        // Random Kategori
+        const catList = categories[type];
+        const category = catList[Math.floor(Math.random() * catList.length)];
+
+        // Random Amount (50rb - 500rb untuk expense, 1jt - 5jt untuk income)
+        let amount;
+        if (type === 'income') {
+            amount = Math.floor(Math.random() * (5000000 - 1000000) + 1000000);
+        } else {
+            amount = Math.floor(Math.random() * (500000 - 50000) + 50000);
+        }
+
+        // Buat Tanggal: Desember 2025 (Bulan 11 di JS karena index mulai 0)
+        const date = new Date(2025, 11, i); 
+
+        transactions.push({
+            id: `dummy_${i}`,
+            type: type,
+            amount: amount,
+            category: category,
+            paymentMethod: 'Cash', // Default
+            date: date, // Objek Date native
+            description: 'Dummy Data Testing'
+        });
+    }
+
+    console.log(`Berhasil membuat ${transactions.length} transaksi dummy.`);
+    
+    // --- PENTING: RE-RENDER CHART & TAMPILAN ---
+    // Kita set view mode ke Monthly & Desember agar langsung terlihat
+    analyzeViewMode = 'monthly';
+    analyzeDate = new Date(2025, 11, 1); // Set kalender aplikasi ke Des 2025
+    
+    // Panggil fungsi-fungsi render
+    if (typeof initChartPage === 'function') initChartPage();
+    if (typeof renderTransactions === 'function') renderTransactions();
+    if (typeof calculateBalance === 'function') calculateBalance();
+}
+
+// Jalankan fungsinya langsung!
+generateDummyData();

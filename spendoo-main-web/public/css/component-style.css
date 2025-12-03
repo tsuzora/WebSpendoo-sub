@@ -141,7 +141,7 @@
   transition: transform 0.3s;
   display: grid; /* Ensures grid applies to rows too */
   align-items: center;
-  overflow-x: hidden;
+  overflow: hidden;
   width: 105%;
   left: -5px;
 }
@@ -154,13 +154,13 @@
   left: 0;
   width: 105%;
   height: 106%; /* Slightly larger to cover borders */
-  background-color: #3A7C50; 
+  background-color: transparent; 
   z-index: -1; 
   opacity: 0;
   transform: scaleY(0.95);
   transition: all 0.3s;
   border-radius: 4px;
-  overflow-x: hidden;
+  overflow: hidden;
   left: -5px;
 }
 
@@ -170,6 +170,10 @@
 
 .list-row.expense:hover {
   background: linear-gradient(90deg, rgba(231, 76, 60, 0.35) 0%, rgba(231, 76, 60, 0.05) 100%);
+}
+
+.list-row.expense:before {
+  overflow: hidden;
 }
 
 .list-row.expense {
@@ -399,4 +403,12 @@
     grid-template-columns: 1fr 1fr;
     font-size: 0.9rem;
   }
+}
+
+.filter-chip.active {
+  background-color: var(--sp-green) !important; /* Bright Green */
+  color: var(--sp-dark) !important;
+  border-color: var(--sp-green) !important;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(52, 245, 140, 0.4);
 }
