@@ -182,7 +182,7 @@ function initApp(user) {
 const BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://spendoo-backend.vercel.app/";
+    : "https://spendoo-backend.vercel.app";
 // === MODIFIKASI DIMULAI: Listener Realtime Firestore ===
 async function fetchTransactions() {
   if (!auth.currentUser) return;
@@ -192,8 +192,8 @@ async function fetchTransactions() {
     const token = await auth.currentUser.getIdToken();
 
     // 2. Call Vercel Server
-    const response = await fetch("${BASE_URL}/api.transactions", {
-      headers: { Authorization: token },
+    const response = await fetch(`${BASE_URL}/api.transactions`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) throw new Error("Failed to fetch");
