@@ -724,11 +724,31 @@ function renderGradeSummaryCard(totalIncome, totalExpense) {
   const exp = totalExpense || 0;
 
   // kalau sama sekali belum ada data, sembunyikan
-  if (inc === 0 && exp === 0) {
-    gradeSummaryCardEl.style.display = "none";
-    if (detailedAdviceTitleEl) detailedAdviceTitleEl.style.display = "none";
-    if (detailedAdviceListEl) detailedAdviceListEl.innerHTML = "";
-    return;
+ if (!transactions || transactions.length === 0) {
+  // TAMPILKAN kartu, tapi dengan pesan "belum ada data"
+  gradeSummaryCardEl.style.display = "grid";
+
+  gradeSummaryCardEl.classList.remove(
+    "grade-excellent",
+    "grade-looking-good",
+    "grade-average",
+    "grade-not-good",
+    "grade-fatal"
+  );
+  gradeSummaryCardEl.classList.add("grade-average"); // warna netral
+
+  if (gradeTitleEl) gradeTitleEl.textContent = "LET'S GET STARTED!";
+  if (gradeTaglineEl) gradeTaglineEl.textContent = "NO DATA YET";
+  if (gradeDescriptionEl) {
+    gradeDescriptionEl.textContent =
+      "We need at least one period of income and expense to grade your cash flow. Start recording your transactions to see your statistics.";
+  }
+
+  // detail advice tetap disembunyikan
+  if (detailedAdviceTitleEl) detailedAdviceTitleEl.style.display = "none";
+  if (detailedAdviceListEl) detailedAdviceListEl.innerHTML = "";
+
+  return;
   }
 
   gradeSummaryCardEl.style.display = "grid";
@@ -1149,6 +1169,7 @@ function refreshAnalyzeChart() {
     if (canvas) canvas.style.display = "block";
     if (emptyEl) emptyEl.style.display = "none";
     drawFinancialChart(labels, incomeData, expenseData, title);
+    refreshAdviceSection();
   }
 
   // Advice bagian bawah juga di-refresh (baik mode bulan maupun tahun)
