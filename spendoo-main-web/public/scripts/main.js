@@ -179,6 +179,11 @@ function initApp(user) {
 }
 
 // === MODIFIKASI DIMULAI: Listener Realtime Firestore ===
+const BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://spendoo-backend.vercel.app/";
+// === MODIFIKASI DIMULAI: Listener Realtime Firestore ===
 async function fetchTransactions() {
   if (!auth.currentUser) return;
 
@@ -187,8 +192,7 @@ async function fetchTransactions() {
     const token = await auth.currentUser.getIdToken();
 
     // 2. Call Vercel Server
-    const response = await fetch("/api/transactions", {
-      method: "GET",
+    const response = await fetch("${BASE_URL}/api.transactions", {
       headers: { Authorization: token },
     });
 
@@ -199,7 +203,6 @@ async function fetchTransactions() {
     // 3. Normalization (Fix Date Objects from JSON string)
     transactions = data.map((tx) => {
       // Server sends date strings, convert back to JS Date Object for your app logic
-      // Note: We don't use Firebase Timestamp objects anymore on frontend
       let dateObj = new Date();
       if (tx.date && tx.date._seconds) {
         // Handle if server sent raw Firestore timestamp
@@ -208,7 +211,7 @@ async function fetchTransactions() {
         dateObj = new Date(tx.date);
       }
 
-      return { ...tx, date: dateObj }; // We pretend it's a Timestamp object for your logic
+      return { ...tx, date: dateObj }; 
     });
 
     // Sort descending
@@ -231,7 +234,7 @@ function renderHomeTable() {
   container.innerHTML = "";
 
   // Optional: Limit to recent 10 transactions
-  const recentTransactions = transactions.slice(0, 10); 
+  const recentTransactions = transactions.slice(0, 10);
 
   if (recentTransactions.length === 0) {
     container.innerHTML = `<div style="padding:20px; text-align:center; color:#888;">No recent activity.</div>`;
@@ -241,21 +244,25 @@ function renderHomeTable() {
   recentTransactions.forEach((tx) => {
     // 1. Date Handling
     let txDate;
-    if (tx.date && typeof tx.date.toDate === 'function') {
+    if (tx.date && typeof tx.date.toDate === "function") {
       txDate = tx.date.toDate();
     } else {
       txDate = new Date(tx.date);
     }
-    const dateStr = formatDate(txDate, { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateStr = formatDate(txDate, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     const amountStr = formatCurrency(tx.amount);
 
     // 2. Icon Handling
-    const catObj = CATEGORIES[tx.type]?.find(c => c.name === tx.category);
+    const catObj = CATEGORIES[tx.type]?.find((c) => c.name === tx.category);
     const icon = catObj ? catObj.icon : ICONS.OTHERS;
 
     // 3. Create Row using your Template Structure
     const row = document.createElement("div");
-    row.className = "list-row"; 
+    row.className = "list-row";
     row.setAttribute("role", "row");
     row.dataset.id = tx.id;
 
@@ -263,12 +270,16 @@ function renderHomeTable() {
     // We put the Icon inside #cell-name since there is no separate "Type" column in this template
     row.innerHTML = `
       <div id="cell-name" role="gridcell">
-         <div style="width:24px; height:24px; color: ${tx.type === 'income' ? '#2ecc71' : '#e74c3c'}">${icon}</div>
+         <div style="width:24px; height:24px; color: ${
+           tx.type === "income" ? "#2ecc71" : "#e74c3c"
+         }">${icon}</div>
          <span>${tx.category}</span>
       </div>
       
-      <div id="cell-amount" role="gridcell" style="color: ${tx.type === 'income' ? '#2ecc71' : '#e74c3c'}">
-         ${tx.type === 'expense' ? '-' : '+'} Rp${amountStr}
+      <div id="cell-amount" role="gridcell" style="color: ${
+        tx.type === "income" ? "#2ecc71" : "#e74c3c"
+      }">
+         ${tx.type === "expense" ? "-" : "+"} Rp${amountStr}
       </div>
       
       <div id="cell-date" role="gridcell">
@@ -278,7 +289,7 @@ function renderHomeTable() {
 
     // 5. Add Click Listener
     row.addEventListener("click", () => openTxPage("edit", tx.id));
-    
+
     container.appendChild(row);
   });
 }
@@ -300,30 +311,34 @@ function renderTransactions() {
   }
 
   // Limit to recent 10
-  const recentTransactions = transactions.slice(0, 10); 
+  const recentTransactions = transactions.slice(0, 10);
 
   recentTransactions.forEach((tx) => {
     // 1. Date Handling
     let txDate;
-    if (tx.date && typeof tx.date.toDate === 'function') {
+    if (tx.date && typeof tx.date.toDate === "function") {
       txDate = tx.date.toDate();
     } else {
       txDate = new Date(tx.date);
     }
-    const dateStr = formatDate(txDate, { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateStr = formatDate(txDate, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     const amountStr = formatCurrency(tx.amount);
 
     // 2. Icon & Color Class Logic
-    const catObj = CATEGORIES[tx.type]?.find(c => c.name === tx.category);
+    const catObj = CATEGORIES[tx.type]?.find((c) => c.name === tx.category);
     const icon = catObj ? catObj.icon : ICONS.OTHERS;
-    
+
     // Determine which class to use based on type
-    const colorClass = tx.type === 'income' ? 'text-income' : 'text-expense';
-    const sign = tx.type === 'expense' ? '-' : '+';
+    const colorClass = tx.type === "income" ? "text-income" : "text-expense";
+    const sign = tx.type === "expense" ? "-" : "+";
 
     // 3. Create Row
     const row = document.createElement("div");
-    row.className = "list-row"; 
+    row.className = "list-row";
     row.setAttribute("role", "row");
     row.dataset.id = tx.id;
 
@@ -345,7 +360,7 @@ function renderTransactions() {
 
     // 5. Click Listener
     row.addEventListener("click", () => openTxPage("edit", tx.id));
-    
+
     container.appendChild(row);
   });
 }
