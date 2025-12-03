@@ -62,6 +62,7 @@
 
 /* Container for History Page */
 #transaction-listing-container {
+  font-size: 24px;
   width: 67dvw;
   padding: 20px;
 }
@@ -83,8 +84,9 @@
 .list-header #col-header, 
 .activity-list-header #col-header {
   font-size: 24px;
-  margin: 0; /* Removed large vertical margin for better alignment */
+  margin: 12px; /* Removed large vertical margin for better alignment */
   font-weight: 600;
+ 
 }
 
 /* --- GRID COLUMNS CONFIGURATION --- */
@@ -93,7 +95,7 @@
 #transaction-listing-container .list-header, 
 #transaction-listing-container .list-row {
   display: grid;
-  grid-template-columns: 1fr 20dvw 200px; /* 3 Columns */
+  grid-template-columns: 1.25fr 0.75fr 200px; /* 3 Columns */
   gap: 25px;
 }
 
@@ -101,7 +103,7 @@
 .activity-list-header, 
 .activity-scroll .list-row {
   display: grid;
-  grid-template-columns: 10dvh 1fr 200px; /* 3 Columns with Icon first */
+  grid-template-columns: 1.25fr 0.75fr 200px; /* 3 Columns with Icon first */
   gap: 25px;
 }
 
@@ -139,6 +141,9 @@
   transition: transform 0.3s;
   display: grid; /* Ensures grid applies to rows too */
   align-items: center;
+  overflow-x: hidden;
+  width: 105%;
+  left: -5px;
 }
 
 /* --- Hover Effect (Green Highlight) --- */
@@ -147,7 +152,7 @@
   position: absolute;
   top: -3%;
   left: 0;
-  width: 100%;
+  width: 105%;
   height: 106%; /* Slightly larger to cover borders */
   background-color: #3A7C50; 
   z-index: -1; 
@@ -155,24 +160,54 @@
   transform: scaleY(0.95);
   transition: all 0.3s;
   border-radius: 4px;
+  overflow-x: hidden;
+  left: -5px;
 }
 
 .list-row:hover {
-  transform: translateY(-5px); /* Moved up slightly */
+  transform: translateX(5px); /* Moved up slightly */
 }
 
-.list-row:hover::before {
-  opacity: 1;
-  transform: scaleY(1); 
+.list-row.expense:hover {
+  background: linear-gradient(90deg, rgba(231, 76, 60, 0.35) 0%, rgba(231, 76, 60, 0.05) 100%);
+}
+
+.list-row.expense {
+  /* Starts red on the left, fades to transparent on the right */
+  background: linear-gradient(90deg, rgba(231, 76, 60, 0.2) 0%, rgba(231, 76, 60, 0) 100%);
+  border-left: 4px solid #e74c3c; /* Optional: Adds a solid accent bar on the left */
+}
+
+.list-row.income:hover {
+  background: linear-gradient(90deg, rgba(46, 204, 113, 0.35) 0%, rgba(46, 204, 113, 0.05) 100%);
+}
+
+.list-row.income {
+  /* Starts green on the left, fades to transparent on the right */
+  background: linear-gradient(90deg, rgba(46, 204, 113, 0.2) 0%, rgba(46, 204, 113, 0) 100%);
+  border-left: 4px solid #2ecc71; /* Optional: Adds a solid accent bar on the left */
 }
 
 /* --- Cell Specifics --- */
 #cell-name {
   display: flex; 
   flex-direction: row;
+  width: 80%;
+  padding: 12px;
   overflow-x: hidden;
   align-items: center;
   gap: 16px;
+}
+
+#cell-amount{
+  position: relative;
+  padding: 12px;
+  left: -75px;
+}
+#cell-date {
+  position: relative; 
+  padding: 12px;
+  left: -100px;
 }
 
 #cell-name svg {

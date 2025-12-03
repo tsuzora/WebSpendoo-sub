@@ -58,7 +58,7 @@
               <!-- Divider Line -->
               <li class="divider"></li>
               <!-- Logout Link -->
-              <li><a href="#" class="danger-text">Logout</a></li>
+              <li><a href="#" id="logoutBtn" class="danger-text">Logout</a></li>
             </ul>
           </div>
         </div>
@@ -126,17 +126,119 @@
 
       <!-- 4. FAQ SECTION -->
       <section id="page-faq" class="page-section">
-        <h2>Frequently Asked Questions</h2>
-        <div class="faq-container">
-          <!-- FAQ items structure -->
-          <details>
-            <summary>How is data stored?</summary>
-            <p>Data is stored locally on your device.</p>
-          </details>
-          <details>
-            <summary>Can I export data?</summary>
-            <p>Export functionality is coming soon.</p>
-          </details>
+        <div class="faq-wrapper">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+      
+          <div class="faq-category">
+            <h3 class="category-title">Akun & Keamanan</h3>
+      
+            <details class="faq-item">
+              <summary>Apa perbedaan antara "Continue as Guest" dan "Login"?</summary>
+              <div class="faq-content">
+                <p><strong>Guest Mode (Tamu):</strong> Anda bisa langsung mencoba fitur tanpa mendaftar. Data hanya tersimpan
+                  sementara di perangkat ini dan akan hilang jika cache dihapus.</p>
+                <p><strong>Login (Terdaftar):</strong> Data tersimpan aman di Cloud. Anda bisa mengakses data keuangan dari
+                  perangkat mana saja tanpa takut hilang.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Apakah data keuangan saya aman?</summary>
+              <div class="faq-content">
+                <p>Ya, keamanan akses dibatasi secara ketat. Hanya Anda (pemilik akun) yang dapat melihat transaksi dan
+                  riwayat keuangan. Pengguna lain tidak memiliki akses ke data pribadi Anda.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Bagaimana cara mendaftar akun Spendoo?</summary>
+              <div class="faq-content">
+                <p>Klik tombol "Sign Up" pada halaman utama. Anda bisa mendaftar cepat menggunakan akun Google atau mengisi
+                  formulir pendaftaran dengan Email dan Password.</p>
+              </div>
+            </details>
+          </div>
+      
+          <div class="faq-category">
+            <h3 class="category-title">Transaksi & Kategori</h3>
+      
+            <details class="faq-item">
+              <summary>Mengapa saya harus memilih "Kategori" saat mencatat?</summary>
+              <div class="faq-content">
+                <p>Kategori penting agar fitur Analisis (Advice Page) bekerja optimal. Sistem memerlukan kategori untuk
+                  membuat Donut Chart yang menunjukkan ke mana uang Anda paling banyak dihabiskan.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Bisakah saya mengubah transaksi yang sudah disimpan?</summary>
+              <div class="faq-content">
+                <p>Ya. Buka menu <em>Transaction History</em>, cari transaksi yang ingin diubah, lalu klik pada transaksi
+                  tersebut untuk mengedit atau menghapusnya.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Data apa saja yang wajib diisi?</summary>
+              <div class="faq-content">
+                <ul>
+                  <li>Jumlah uang (Amount)</li>
+                  <li>Kategori (Category)</li>
+                  <li>Tanggal dan Waktu (Date & Time)</li>
+                  <li>Jenis Transaksi (Income atau Expense)</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+      
+          <div class="faq-category">
+            <h3 class="category-title">Analisis & Laporan</h3>
+      
+            <details class="faq-item">
+              <summary>Cara melihat ringkasan pengeluaran bulan ini?</summary>
+              <div class="faq-content">
+                <p>Buka menu Dashboard atau Advice Page. Anda akan melihat Bar Chart perbandingan pemasukan vs pengeluaran,
+                  serta opsi filter berdasarkan Bulan atau Tahun.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Bisakah saya mengunduh data transaksi?</summary>
+              <div class="faq-content">
+                <p>Tentu. Gunakan fitur <strong>Export Data</strong> di menu pengaturan. Data akan diunduh dalam format .CSV
+                  yang kompatibel dengan Microsoft Excel atau Google Sheets.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Mengapa grafik analisis saya kosong?</summary>
+              <div class="faq-content">
+                <p>Grafik muncul jika ada data pada periode tersebut. Pastikan Anda sudah menginput transaksi dan memilih
+                  filter waktu (Bulan/Tahun) yang benar.</p>
+              </div>
+            </details>
+          </div>
+      
+          <div class="faq-category">
+            <h3 class="category-title"> Masalah Teknis</h3>
+      
+            <details class="faq-item">
+              <summary>Apakah Spendoo bisa digunakan tanpa internet?</summary>
+              <div class="faq-content">
+                <p>Tidak. Spendoo berbasis web dan membutuhkan koneksi internet untuk menyimpan data ke Cloud Firestore secara
+                  real-time (sinkronisasi) dan otentikasi akun.</p>
+              </div>
+            </details>
+      
+            <details class="faq-item">
+              <summary>Perangkat apa saja yang didukung?</summary>
+              <div class="faq-content">
+                <p>Spendoo dapat diakses melalui browser modern (Chrome, Firefox, Safari, Edge) di Desktop (Laptop/PC),
+                  Tablet, maupun Smartphone.</p>
+              </div>
+            </details>
+          </div>
+      
         </div>
       </section>
     </article>

@@ -201,9 +201,9 @@ body {
   flex-direction: row;
   max-width: 95dvw;
   min-height: 50dvh;
-  max-height: 95dvh;
+  max-height: 93dvh;
   margin: 0 auto;
-  padding: 24px;
+  padding: 12px;
 }
 
 .dashboard-container {

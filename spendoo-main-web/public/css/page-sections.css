@@ -147,61 +147,138 @@
 }
 
 /* =========================================
-   4. FAQ PAGE STYLES
+   4. FAQ PAGE STYLES - REVAMPED
    ========================================= */
-.faq-container {
+
+#page-faq {
+    justify-content: center;
+    padding: 40px 20px;
+    width: 100%;
+    height: 87dvh;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+#page-faq.active {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;    
+}
+
+.faq-wrapper {
+    width: 100%;
+    max-height: 67dvh; /* Membatasi lebar agar nyaman dibaca */
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    padding: 24px;
-    width: 60dvw;
+    gap: 16px;
 }
 
-details {
+.section-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+/* --- Category Group Styling --- */
+.faq-category {
+    margin-bottom: 10px;
+}
+
+.category-title {
+    font-size: 1.1rem;
+    color: #2ecc71; /* Warna hijau aksen */
+    margin-bottom: 15px;
+    padding-left: 5px;
+    border-left: 3px solid #2ecc71;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- Accordion Item Styling --- */
+details.faq-item {
     background: var(--bg-card, #142f22);
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
 }
 
+details.faq-item:hover {
+    border-color: rgba(46, 204, 113, 0.4);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* --- Summary (Pertanyaan) --- */
 summary {
-    padding: 20px;
+    padding: 18px 20px;
     cursor: pointer;
-    font-weight: 400;
-    font-size: 36px;
+    font-weight: 500;
+    font-size: 1rem; /* Ukuran font standar yang nyaman (sekitar 16px) */
     color: var(--text-white, #fff);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    list-style: none; /* Remove default arrow */
-    transition: background 0.3s;
+    list-style: none;
+    user-select: none;
+}
+
+/* Menghilangkan panah default browser */
+summary::-webkit-details-marker {
+    display: none;
 }
 
 summary:hover {
     background: rgba(255,255,255,0.03);
 }
 
-/* Custom Accordion Icon */
+/* Custom Icon (+ / -) */
 summary::after {
     content: '+';
     color: #2ecc71;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 0;
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-left: 10px;
+    transition: transform 0.3s ease;
 }
 
 details[open] summary::after {
     content: '-';
     color: #e74c3c;
+    transform: rotate(180deg);
 }
 
-details p {
-    padding: 0 20px 20px;
-    margin: 0;
+details[open] summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* --- Content (Jawaban) --- */
+.faq-content {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.15); /* Background sedikit lebih gelap */
+    color: #d1dcd5; /* Warna teks tidak pure white agar mata tidak lelah */
+    font-size: 0.95rem;
     line-height: 1.6;
-    color: var(--text-muted, #fff);
-    background-color: #3A7C50;
-    font-size: 24px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    padding-top: 15px;
+}
+
+.faq-content p {
+    margin: 0 0 10px 0;
+}
+
+.faq-content p:last-child {
+    margin-bottom: 0;
+}
+
+.faq-content ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.faq-content li {
+    margin-bottom: 5px;
 }

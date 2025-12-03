@@ -262,7 +262,7 @@ function renderHomeTable() {
 
     // 3. Create Row using your Template Structure
     const row = document.createElement("div");
-    row.className = "list-row";
+    row.className = `list-row ${tx.type}`;
     row.setAttribute("role", "row");
     row.dataset.id = tx.id;
 
@@ -273,7 +273,7 @@ function renderHomeTable() {
          <div style="width:24px; height:24px; color: ${
            tx.type === "income" ? "#2ecc71" : "#e74c3c"
          }">${icon}</div>
-         <span>${tx.category}</span>
+         <span style="font-size:24px">${tx.category}</span>
       </div>
       
       <div id="cell-amount" role="gridcell" style="color: ${
@@ -593,10 +593,6 @@ async function saveTransaction() {
         transactions.unshift(guestTx);
       }
 
-      // Save to LocalStorage so it survives refresh
-      // We filter out complex objects if necessary, but JSON.stringify handles Dates as strings automatically
-      localStorage.setItem("guest_transactions", JSON.stringify(transactions));
-
       // Update UI Immediately
       renderTransactions();
       renderHomeTable();
@@ -605,7 +601,7 @@ async function saveTransaction() {
       closeTxPage();
 
       console.log("Transaction saved locally (Guest Mode)");
-      return; // STOP HERE (Do not run server code)
+      return;
     }
 
     // ============================================================
@@ -987,7 +983,6 @@ onAuthStateChanged(auth, (user) => {
     if (userNameDisplay) userNameDisplay.textContent = "Guest";
     if (profilePic) profilePic.src = "assets/img/user.png";
 
-    loadGuestData();
   } else {
     // === KONDISI 3: BELUM LOGIN & BUKAN GUEST ===
     console.log("onAuthStateChanged: No user. Redirecting to login.");
@@ -1047,18 +1042,3 @@ document.addEventListener("click", (e) => {
     container.classList.remove("active");
   }
 });
-
-function loadGuestData() {
-  const localData = localStorage.getItem("guest_transactions");
-  if (localData) {
-    const parsedData = JSON.parse(localData);
-    // Convert date strings back to Date objects
-    transactions = parsedData.map((tx) => ({
-      ...tx,
-      date: new Date(tx.date),
-    }));
-    renderTransactions();
-    renderHistoryTable();
-    calculateBalance();
-  }
-}
