@@ -663,6 +663,51 @@ function formatTime(date) {
   });
 }
 
+function exportTransactionsToCSV() {
+  // 1. Check if there is data
+  if (!transactions || transactions.length === 0) {
+    showAlert("Export Failed", "No transactions available to export.");
+    return;
+  }
+
+  let csvContent = "Date,Type,Category,Amount,Payment Method,ID\n";
+  
+  transactions.forEach((tx) => {
+    const dateObj = tx.date.toDate(); 
+    const dateString = dateObj.toISOString().split('T')[0]; 
+
+    // Escape quotes if they exist in text fields to prevent breaking CSV
+    const category = tx.category.replace(/"/g, '""');
+    const method = (tx.paymentMethod || "").replace(/"/g, '""');
+
+    // Construct the row
+    // Format: Date, Type, Category, Amount, Payment Method, ID
+    const row = [
+      `"${dateString}"`,
+      `"${tx.type}"`,
+      `"${category}"`,
+      `"${tx.amount}"`,
+      `"${method}"`,
+      `"${tx.id}"`
+    ].join(",");
+
+    csvContent += row + "\n";
+  });
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  
+  const today = new Date().toISOString().split('T')[0];
+  link.setAttribute("download", `Spendoo_Export_${today}.csv`);
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+ 
 // === EVENT LISTENERS UI ===
 // ... (Event Listener Anda tidak perlu diubah) ...
 function setupEventListeners() {
@@ -741,6 +786,15 @@ function setupEventListeners() {
   timeMinuteDown.addEventListener("click", () =>
     changeTime(timeMinuteDisplay, -1, 0, 59, true)
   );
+
+const btnExport = document.getElementById("btn-export-data");
+  if (btnExport) {
+    btnExport.addEventListener("click", (e) => {
+      e.preventDefault(); 
+      exportTransactionsToCSV();
+    });
+  }
+
 }
 
 // === OTENTIKASI ===
