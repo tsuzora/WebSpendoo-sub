@@ -24,6 +24,59 @@ let currentTxDate = new Date();
 let currentDatePickerDate = new Date(); // Untuk navigasi kalender
 let unsubscribeFromFirestore = null; // Untuk menyimpan fungsi unsub
 
+// === ANALYZE PAGE ===
+const MONTH_NAMES = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
+];
+const MONTH_LABELS_SHORT = [
+  "Jan","Feb","Mar","Apr","May","Jun",
+  "Jul","Aug","Sep","Oct","Nov","Dec"
+];
+
+let financialChartInstance = null;
+let analyzeViewMode = "month";     // 'month' = Per Bulan, 'year' = Per Tahun
+let analyzeSeriesType = "income";  // 'income' atau 'expense'
+
+// DOM
+const viewMonthBtn = document.getElementById("view-month");
+const viewYearBtn  = document.getElementById("view-year");
+const selectYear   = document.getElementById("select-year");
+const selectMonth  = document.getElementById("select-month");
+const labelMonth   = document.getElementById("label-month");
+const typeIncomeBtn  = document.getElementById("type-income");
+const typeExpenseBtn = document.getElementById("type-expense");
+
+// === ADVICE / DONUT CHARTS ===
+let adviceIncomeChart = null;
+let adviceExpenseChart = null;
+
+const CATEGORY_COLORS = [
+  "#22c55e","#4ade80","#bef264","#f97316",
+  "#fb923c","#facc15","#38bdf8","#6366f1",
+  "#a855f7","#ec4899","#f97373","#f59e0b"
+];
+
+const adviceIncomePeriodEl  = document.getElementById("advice-income-period");
+const adviceExpensePeriodEl = document.getElementById("advice-expense-period");
+const adviceIncomeTotalEl   = document.getElementById("advice-income-total");
+const adviceExpenseTotalEl  = document.getElementById("advice-expense-total");
+const adviceIncomeArrowEl   = document.getElementById("advice-income-arrow");
+const adviceExpenseArrowEl  = document.getElementById("advice-expense-arrow");
+const adviceIncomeTextEl    = document.getElementById("advice-income-text");
+const adviceExpenseTextEl   = document.getElementById("advice-expense-text");
+const adviceIncomeLegendEl  = document.getElementById("advice-income-legend");
+const adviceExpenseLegendEl = document.getElementById("advice-expense-legend");
+
+const gradeSummaryCardEl    = document.getElementById("grade-summary-card");
+const gradeTitleEl          = document.getElementById("grade-title");
+const gradeTaglineEl        = document.getElementById("grade-tagline");
+const gradeDescriptionEl    = document.getElementById("grade-description");
+const detailedAdviceTitleEl = document.getElementById("detailed-advice-title");
+const detailedAdviceListEl  = document.getElementById("detailed-advice-list");
+
+
+
 // === MODIFIKASI: FUNGSI HELPER UNTUK KONVERSI BULAN ===
 /**
  * Mengubah nama bulan (String) menjadi angka (0-11)
@@ -220,6 +273,7 @@ async function fetchTransactions() {
     renderTransactions();
     renderHistoryTable();
     calculateBalance();
+    initOrUpdateAnalyzeControls();
   } catch (e) {
     console.error("Error fetching transactions:", e);
     showAlert("Error", "Gagal mengambil data: " + e.message);
@@ -459,6 +513,707 @@ function calculateBalance() {
 
   const balance = totalIncome - totalExpense;
   balanceAmount.textContent = `Rp${formatCurrency(balance)}`;
+}
+
+// Pastikan dapat objek Date dari field tx.date
+function getTxDate(tx) {
+  if (!tx || !tx.date) return null;
+  if (typeof tx.date.toDate === "function") {
+    return tx.date.toDate();
+  }
+  return new Date(tx.date);
+}
+
+// Ambil semua tahun yang ada di data transaksi
+function getAvailableYears() {
+  const yearSet = new Set();
+
+  transactions.forEach((tx) => {
+    const d = getTxDate(tx);
+    if (!d || isNaN(d)) return;
+    yearSet.add(d.getFullYear());
+  });
+
+  const years = Array.from(yearSet).sort((a, b) => a - b);
+  return years;
+}
+
+// Ambil semua bulan (0-11) pada tahun tertentu
+function getAvailableMonthsForYear(year) {
+  const monthSet = new Set();
+
+  transactions.forEach((tx) => {
+    const d = getTxDate(tx);
+    if (!d || isNaN(d)) return;
+    if (d.getFullYear() === year) {
+      monthSet.add(d.getMonth());
+    }
+  });
+
+  return Array.from(monthSet).sort((a, b) => a - b);
+}
+
+function buildDailyData(year, monthIndex) {
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+  const incomePerDay = new Array(daysInMonth).fill(0);
+  const expensePerDay = new Array(daysInMonth).fill(0);
+
+  transactions.forEach((tx) => {
+    const d = getTxDate(tx);
+    if (!d || isNaN(d)) return;
+
+    if (d.getFullYear() === year && d.getMonth() === monthIndex) {
+      const day = d.getDate(); // 1..daysInMonth
+      const idx = day - 1;
+      const amount = Number(tx.amount) || 0;
+
+      if (tx.type === "income") {
+        incomePerDay[idx] += amount;
+      } else if (tx.type === "expense") {
+        expensePerDay[idx] += amount;
+      }
+    }
+  });
+
+  const labels = Array.from({ length: daysInMonth }, (_, i) => String(i + 1));
+
+  return {
+    labels,
+    incomeData: incomePerDay,
+    expenseData: expensePerDay,
+  };
+}
+
+function buildMonthlyData(year) {
+  const incomePerMonth = new Array(12).fill(0);
+  const expensePerMonth = new Array(12).fill(0);
+
+  transactions.forEach((tx) => {
+    const d = getTxDate(tx);
+    if (!d || isNaN(d)) return;
+
+    if (d.getFullYear() === year) {
+      const m = d.getMonth(); // 0..11
+      const amount = Number(tx.amount) || 0;
+
+      if (tx.type === "income") {
+        incomePerMonth[m] += amount;
+      } else if (tx.type === "expense") {
+        expensePerMonth[m] += amount;
+      }
+    }
+  });
+
+  return {
+    labels: MONTH_LABELS_SHORT,
+    incomeData: incomePerMonth,
+    expenseData: expensePerMonth,
+  };
+}
+
+// Tentukan periode aktif (month/year) dari analyzeViewMode
+function getCurrentPeriod() {
+  const year = Number(selectYear?.value || new Date().getFullYear());
+  if (analyzeViewMode === "month") {
+    const monthIndex = Number(selectMonth?.value || new Date().getMonth());
+    return { type: "month", year, monthIndex };
+  }
+  return { type: "year", year };
+}
+
+// Periode sebelumnya untuk perbandingan
+function getPreviousPeriod(period) {
+  if (period.type === "month") {
+    let y = period.year;
+    let m = period.monthIndex - 1;
+    if (m < 0) {
+      m = 11;
+      y -= 1;
+    }
+    return { type: "month", year: y, monthIndex: m };
+  }
+  return { type: "year", year: period.year - 1 };
+}
+
+// Ambil transaksi sesuai periode + tipe (income / expense)
+function filterTransactionsByPeriod(period, txType) {
+  return transactions.filter((tx) => {
+    if (txType && tx.type !== txType) return false;
+    const d = getTxDate(tx);
+    if (!d || isNaN(d)) return false;
+    if (period.type === "month") {
+      return d.getFullYear() === period.year && d.getMonth() === period.monthIndex;
+    }
+    return d.getFullYear() === period.year;
+  });
+}
+
+// Agregasi per kategori
+function aggregateCategory(period, txType) {
+  const map = new Map();
+  const list = filterTransactionsByPeriod(period, txType);
+
+  list.forEach((tx) => {
+    const cat = tx.category || "Other";
+    const amount = Number(tx.amount) || 0;
+    map.set(cat, (map.get(cat) || 0) + amount);
+  });
+
+  const labels = Array.from(map.keys());
+  const data   = Array.from(map.values());
+
+  return { labels, data, total: data.reduce((a, b) => a + b, 0) };
+}
+
+function drawAdviceDonut(canvasId, labels, data, isIncome) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !window.Chart) return null;
+  const ctx = canvas.getContext("2d");
+
+  const colors = labels.map((_, idx) => CATEGORY_COLORS[idx % CATEGORY_COLORS.length]);
+
+  const chart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "68%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const label = ctx.label || "";
+              const value = ctx.parsed || 0;
+              return `${label}: Rp${formatCurrency(value)}`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return { chart, colors };
+}
+
+function buildAdviceLegend(containerEl, labels, colors) {
+  if (!containerEl) return;
+  containerEl.innerHTML = labels.map((label, idx) => `
+    <li>
+      <span class="dot" style="background-color:${colors[idx]};"></span>
+      ${label}
+    </li>
+  `).join("");
+}
+
+// ===== GRADE SUMMARY & DETAIL ADVICE =====
+
+function renderGradeSummaryCard(totalIncome, totalExpense) {
+  if (!gradeSummaryCardEl) return;
+
+  const inc = totalIncome || 0;
+  const exp = totalExpense || 0;
+
+  // kalau sama sekali belum ada data, sembunyikan
+ if (!transactions || transactions.length === 0) {
+  // TAMPILKAN kartu, tapi dengan pesan "belum ada data"
+  gradeSummaryCardEl.style.display = "grid";
+
+  gradeSummaryCardEl.classList.remove(
+    "grade-excellent",
+    "grade-looking-good",
+    "grade-average",
+    "grade-not-good",
+    "grade-fatal"
+  );
+  gradeSummaryCardEl.classList.add("grade-average"); // warna netral
+
+  if (gradeTitleEl) gradeTitleEl.textContent = "LET'S GET STARTED!";
+  if (gradeTaglineEl) gradeTaglineEl.textContent = "NO DATA YET";
+  if (gradeDescriptionEl) {
+    gradeDescriptionEl.textContent =
+      "We need at least one period of income and expense to grade your cash flow. Start recording your transactions to see your statistics.";
+  }
+
+  // detail advice tetap disembunyikan
+  if (detailedAdviceTitleEl) detailedAdviceTitleEl.style.display = "none";
+  if (detailedAdviceListEl) detailedAdviceListEl.innerHTML = "";
+
+  return;
+  }
+
+  gradeSummaryCardEl.style.display = "grid";
+
+  const saving = inc - exp;
+  const savingRate = inc > 0 ? saving / inc : -1;
+
+  let gradeClass = "grade-excellent";
+  let label = "EXCELLENT!";
+  let tagline = "EXCELLENT";
+  let desc = "";
+
+  if (savingRate >= 0.30) {
+    gradeClass = "grade-excellent";
+    label = "EXCELLENT!";
+    tagline = "EXCELLENT";
+    desc = "You consistently spend far below your income and keep a very healthy saving rate.";
+  } else if (savingRate >= 0.15) {
+    gradeClass = "grade-looking-good";
+    label = "LOOKING GOOD!";
+    tagline = "LOOKING GOOD";
+    desc = "Your cash flow looks good. Keep maintaining this pattern to reach an excellent grade.";
+  } else if (savingRate >= 0.05) {
+    gradeClass = "grade-average";
+    label = "AVERAGE";
+    tagline = "AVERAGE";
+    desc = "Your finances are still safe, but there is room to improve your savings and cut non-essential expenses.";
+  } else if (savingRate >= 0) {
+    gradeClass = "grade-not-good";
+    label = "NOT SO GOOD";
+    tagline = "NOT SO GOOD";
+    desc = "Your expenses almost match your income. Try to reduce discretionary spending and build a buffer.";
+  } else {
+    gradeClass = "grade-fatal";
+    label = "FATAL";
+    tagline = "FATAL";
+    desc = "Your expenses are higher than your income. You need an emergency plan to reduce spending or increase income.";
+  }
+
+  // bersihkan kelas lama
+  gradeSummaryCardEl.classList.remove(
+    "grade-excellent",
+    "grade-looking-good",
+    "grade-average",
+    "grade-not-good",
+    "grade-fatal"
+  );
+  gradeSummaryCardEl.classList.add(gradeClass);
+
+  if (gradeTitleEl) gradeTitleEl.textContent = label;
+  if (gradeTaglineEl) gradeTaglineEl.textContent = tagline;
+  if (gradeDescriptionEl) gradeDescriptionEl.textContent =
+    "From the statistics, we’ve analyzed and graded your cash flow. " + desc;
+}
+
+function buildCategoryDropAdvices(aggCurrent, aggPrev) {
+  if (!aggCurrent || !aggPrev) return [];
+
+  const currentMap = {};
+  const prevMap = {};
+
+  aggCurrent.labels.forEach((label, idx) => {
+    currentMap[label] = aggCurrent.data[idx] || 0;
+  });
+  aggPrev.labels.forEach((label, idx) => {
+    prevMap[label] = aggPrev.data[idx] || 0;
+  });
+
+  const items = [];
+
+  Object.keys(prevMap).forEach(label => {
+    const before = prevMap[label];
+    const now = currentMap[label] || 0;
+    if (before > 0 && now < before) {
+      const dropPct = ((before - now) / before) * 100;
+      if (dropPct < 3) return; // abaikan perubahan kecil
+
+      items.push({
+        type: "income",
+        category: label,
+        dropPct,
+        message:
+          `Your ${label.toLowerCase()} income dropped by ${dropPct.toFixed(1)}%. ` +
+          "Review this cash flow and consider how to stabilise or increase it again."
+      });
+    }
+  });
+
+  // sort dari drop terbesar, ambil 3 teratas
+  items.sort((a, b) => b.dropPct - a.dropPct);
+  return items.slice(0, 3);
+}
+
+function renderDetailedAdviceCards(items) {
+  if (!detailedAdviceListEl || !detailedAdviceTitleEl) return;
+
+  detailedAdviceListEl.innerHTML = "";
+
+  if (!items || items.length === 0) {
+    detailedAdviceTitleEl.style.display = "none";
+    return;
+  }
+
+  detailedAdviceTitleEl.style.display = "block";
+
+  items.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "adv-item-card " + (item.type === "expense" ? "adv-expense" : "adv-income");
+    card.innerHTML = `
+      <div class="adv-icon-box">
+        <span>💼</span>
+      </div>
+      <div class="adv-item-main">
+        <p class="adv-item-title">${item.category}</p>
+        <p class="adv-item-desc">${item.message}</p>
+      </div>
+      <div class="adv-drop">
+        <span class="arrow">▼</span>
+        <span>${item.dropPct.toFixed(0)}%</span>
+      </div>
+    `;
+    detailedAdviceListEl.appendChild(card);
+  });
+}
+
+
+function refreshAdviceSection() {
+  if (!transactions || transactions.length === 0) {
+    // kalau tidak ada data, biarkan teks default
+    return;
+  }
+
+  const period   = getCurrentPeriod();
+  const prev     = getPreviousPeriod(period);
+
+  const isMonth  = period.type === "month";
+  const periodLabel = isMonth
+    ? `${MONTH_NAMES[period.monthIndex]} ${period.year}`
+    : String(period.year);
+
+  if (adviceIncomePeriodEl)  adviceIncomePeriodEl.textContent  = periodLabel;
+  if (adviceExpensePeriodEl) adviceExpensePeriodEl.textContent = periodLabel;
+
+  // ============= INCOME =============
+  const aggInc  = aggregateCategory(period, "income");
+  const aggIncPrev = aggregateCategory(prev, "income");
+
+  if (adviceIncomeTotalEl) {
+    adviceIncomeTotalEl.textContent = "Rp" + formatCurrency(aggInc.total);
+  }
+
+  let incChangeText = "No previous income data for comparison.";
+  let incArrowClass = "";
+  let incArrowChar  = "▲";
+
+  if (aggIncPrev.total > 0) {
+    const diff = aggInc.total - aggIncPrev.total;
+    const pct  = (diff / aggIncPrev.total) * 100;
+    const pctStr = Math.abs(pct).toFixed(0) + "%";
+
+    if (pct > 0) {
+      incChangeText = `Your total income increased by ${pctStr} compared to previous period.`;
+      incArrowClass = "up";
+      incArrowChar  = "▲";
+    } else if (pct < 0) {
+      incChangeText = `Your total income decreased by ${pctStr} compared to previous period.`;
+      incArrowClass = "down";
+      incArrowChar  = "▼";
+    } else {
+      incChangeText = "Your total income is the same as previous period.";
+      incArrowClass = "up";
+      incArrowChar  = "▲";
+    }
+  }
+
+  if (adviceIncomeArrowEl) {
+    adviceIncomeArrowEl.textContent = incArrowChar;
+    adviceIncomeArrowEl.classList.remove("up","down");
+    if (incArrowClass) adviceIncomeArrowEl.classList.add(incArrowClass);
+  }
+  if (adviceIncomeTextEl) {
+    adviceIncomeTextEl.textContent = incChangeText;
+  }
+
+  // render donut income
+  if (adviceIncomeChart) adviceIncomeChart.destroy();
+  const incomeResult = drawAdviceDonut("adviceIncomeChart", aggInc.labels, aggInc.data, true);
+  if (incomeResult && adviceIncomeLegendEl) {
+    buildAdviceLegend(adviceIncomeLegendEl, aggInc.labels, incomeResult.colors);
+    adviceIncomeChart = incomeResult.chart;
+  }
+
+  // ============= EXPENSE =============
+  const aggExp  = aggregateCategory(period, "expense");
+  const aggExpPrev = aggregateCategory(prev, "expense");
+
+  if (adviceExpenseTotalEl) {
+    adviceExpenseTotalEl.textContent = "Rp" + formatCurrency(aggExp.total);
+  }
+
+  let expChangeText = "No previous spending data for comparison.";
+  let expArrowClass = "";
+  let expArrowChar  = "▲";
+
+  if (aggExpPrev.total > 0) {
+    const diff = aggExp.total - aggExpPrev.total;
+    const pct  = (diff / aggExpPrev.total) * 100;
+    const pctStr = Math.abs(pct).toFixed(0) + "%";
+
+    if (pct > 0) {
+      expChangeText = `Your total spending increased by ${pctStr} compared to previous period.`;
+      expArrowClass = "down"; // naik = buruk, panah merah
+      expArrowChar  = "▼";
+    } else if (pct < 0) {
+      expChangeText = `Your total spending decreased by ${pctStr} compared to previous period.`;
+      expArrowClass = "up";
+      expArrowChar  = "▲";
+    } else {
+      expChangeText = "Your total spending is the same as previous period.";
+      expArrowClass = "down";
+      expArrowChar  = "▼";
+    }
+  }
+
+  if (adviceExpenseArrowEl) {
+    adviceExpenseArrowEl.textContent = expArrowChar;
+    adviceExpenseArrowEl.classList.remove("up","down");
+    if (expArrowClass) adviceExpenseArrowEl.classList.add(expArrowClass);
+  }
+  if (adviceExpenseTextEl) {
+    adviceExpenseTextEl.textContent = expChangeText;
+  }
+
+  // render donut expense
+    // render donut expense
+  if (adviceExpenseChart) adviceExpenseChart.destroy();
+  const expenseResult = drawAdviceDonut("adviceExpenseChart", aggExp.labels, aggExp.data, false);
+  if (expenseResult && adviceExpenseLegendEl) {
+    buildAdviceLegend(adviceExpenseLegendEl, aggExp.labels, expenseResult.colors);
+    adviceExpenseChart = expenseResult.chart;
+  }
+
+  // ===== GRADE SUMMARY + DETAIL ADVICE (NEW) =====
+  renderGradeSummaryCard(aggInc.total, aggExp.total);
+
+  const dropAdviceItems = buildCategoryDropAdvices(aggInc, aggIncPrev);
+  renderDetailedAdviceCards(dropAdviceItems);
+}
+
+function drawFinancialChart(labels, incomeData, expenseData, title) {
+  const canvas = document.getElementById("financialChart");
+  if (!canvas || !window.Chart) return;
+
+  const ctx = canvas.getContext("2d");
+
+  if (financialChartInstance) {
+    financialChartInstance.destroy();
+  }
+
+  financialChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Income",
+          data: incomeData,
+          backgroundColor: "rgba(34, 197, 94, 0.8)",
+          borderRadius: 4,
+        },
+        {
+          label: "Expense",
+          data: expenseData,
+          backgroundColor: "rgba(239, 68, 68, 0.8)",
+          borderRadius: 4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: "#e5e7eb" },
+        },
+        title: {
+          display: true,
+          text: title,
+          color: "#e5e7eb",
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: "#e5e7eb" },
+          grid: { display: false },
+        },
+        y: {
+          ticks: {
+            color: "#e5e7eb",
+            callback: (value) => "Rp" + formatCurrency(value),
+          },
+          grid: { color: "rgba(148, 163, 184, 0.2)" },
+        },
+      },
+    },
+  });
+}
+
+function initOrUpdateAnalyzeControls() {
+  if (!viewMonthBtn || !viewYearBtn || !selectYear || !selectMonth) return;
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+
+  const hasTx = transactions && transactions.length > 0;
+
+  // --- TAHUN ---
+  let years = hasTx ? getAvailableYears() : [currentYear];
+  if (years.length === 0) years = [currentYear];
+
+  const prevYear = Number(selectYear.value);
+  const defaultYear = years.includes(prevYear)
+    ? prevYear
+    : years[years.length - 1];
+
+  selectYear.innerHTML = years
+    .map((y) => `<option value="${y}">${y}</option>`)
+    .join("");
+  selectYear.value = String(defaultYear);
+
+  // --- BULAN ---
+  let months;
+  if (hasTx) {
+    months = getAvailableMonthsForYear(defaultYear);
+  } else {
+    // kalau belum ada transaksi, tampilkan semua bulan supaya chart tetap full
+    months = Array.from({ length: 12 }, (_, i) => i); // 0..11
+  }
+  if (months.length === 0) {
+    months = Array.from({ length: 12 }, (_, i) => i);
+  }
+
+  const prevMonth = Number(selectMonth.value);
+  let defaultMonth = months.includes(prevMonth)
+    ? prevMonth
+    : months.includes(currentMonth)
+    ? currentMonth
+    : months[0];
+
+  selectMonth.innerHTML = months
+    .map((m) => `<option value="${m}">${MONTH_NAMES[m]}</option>`)
+    .join("");
+  selectMonth.value = String(defaultMonth);
+
+  // gambar / update chart
+  refreshAnalyzeChart();
+}
+
+function refreshAnalyzeChart() {
+  if (!selectYear) return;
+
+  const year = Number(selectYear.value || new Date().getFullYear());
+  const emptyEl = document.getElementById("chart-empty-state");
+  const canvas = document.getElementById("financialChart");
+
+  let labels, incomeData, expenseData, title;
+
+  if (analyzeViewMode === "month") {
+    const monthIndex = Number(selectMonth.value || new Date().getMonth());
+    const data = buildDailyData(year, monthIndex);
+    labels = data.labels;
+    incomeData = data.incomeData;
+    expenseData = data.expenseData;
+    title = `Per Hari — ${MONTH_NAMES[monthIndex]} ${year}`;
+  } else {
+    const data = buildMonthlyData(year);
+    labels = data.labels;
+    incomeData = data.incomeData;
+    expenseData = data.expenseData;
+    title = `Per Bulan — ${year}`;
+  }
+
+  // === update tulisan Total Income / Expense di atas chart ===
+  const totalIncome = incomeData.reduce((a, b) => a + b, 0);
+  const totalExpense = expenseData.reduce((a, b) => a + b, 0);
+
+  const summaryLabelEl = document.getElementById("analyze-summary-label");
+  const summaryValueEl = document.getElementById("analyze-total-value");
+
+  if (summaryLabelEl && summaryValueEl) {
+    if (analyzeSeriesType === "expense") {
+      summaryLabelEl.textContent = "Total Expense";
+      summaryValueEl.textContent = "Rp" + formatCurrency(totalExpense);
+    } else {
+      summaryLabelEl.textContent = "Total Income";
+      summaryValueEl.textContent = "Rp" + formatCurrency(totalIncome);
+    }
+  }
+
+  // === cek apakah ada data untuk periode ini ===
+  const hasIncome = incomeData.some((v) => v !== 0);
+  const hasExpense = expenseData.some((v) => v !== 0);
+  const hasData = hasIncome || hasExpense;
+
+  if (!hasData) {
+    // hancurkan chart lama kalau ada
+    if (financialChartInstance) {
+      financialChartInstance.destroy();
+      financialChartInstance = null;
+    }
+    if (canvas) canvas.style.display = "none";
+    if (emptyEl) {
+      emptyEl.style.display = "flex";
+      emptyEl.textContent = "No data yet for this period";
+    }
+  } else {
+    if (canvas) canvas.style.display = "block";
+    if (emptyEl) emptyEl.style.display = "none";
+    drawFinancialChart(labels, incomeData, expenseData, title);
+    refreshAdviceSection();
+  }
+
+  // Advice bagian bawah juga di-refresh (baik mode bulan maupun tahun)
+  refreshAdviceSection();
+}
+
+
+// === EVENT LISTENER UNTUK ANALYZE PAGE ===
+if (viewMonthBtn && viewYearBtn && selectYear && selectMonth) {
+  viewMonthBtn.addEventListener("click", () => {
+    analyzeViewMode = "month";
+    viewMonthBtn.classList.add("active");
+    viewYearBtn.classList.remove("active");
+    labelMonth.style.display = "";
+    selectMonth.style.display = "";
+    refreshAnalyzeChart();
+  });
+
+  viewYearBtn.addEventListener("click", () => {
+    analyzeViewMode = "year";
+    viewYearBtn.classList.add("active");
+    viewMonthBtn.classList.remove("active");
+    labelMonth.style.display = "none";
+    selectMonth.style.display = "none";
+    refreshAnalyzeChart();
+  });
+
+  selectYear.addEventListener("change", () => {
+    // kalau year berubah, update daftar bulan untuk mode 'month'
+    if (analyzeViewMode === "month") {
+      const year = Number(selectYear.value);
+      const months = getAvailableMonthsForYear(year);
+      selectMonth.innerHTML = months
+        .map((m) => `<option value="${m}">${MONTH_NAMES[m]}</option>`)
+        .join("");
+    }
+    refreshAnalyzeChart();
+  });
+
+  selectMonth.addEventListener("change", () => {
+    if (analyzeViewMode === "month") {
+      refreshAnalyzeChart();
+    }
+  });
 }
 
 // Buka Halaman Tambah/Edit Transaksi
