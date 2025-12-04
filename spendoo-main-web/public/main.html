@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spendoo | Dashboard</title>
 
+  <!-- External Stylesheets -->
   <link rel="stylesheet" href="../css/variables.css" />
   <link rel="stylesheet" href="../css/root-style.css" />
   <link rel="stylesheet" href="../css/main-layout-style.css" />
@@ -15,6 +16,7 @@
 </head>
 
 <body>
+  <!-- === NAVBAR === -->
   <header class="navbar">
     <div class="navbar-left">
       <h1 class="logo">Spendoo</h1>
@@ -39,6 +41,7 @@
           </div>
           <ul class="dropdown-list">
             <li><a href="#">Settings</a></li>
+            <li><a href="#" id="btn-export-data">Export Data</a></li>
             <li class="divider"></li>
             <li><a href="#" id="logoutBtn" class="danger-text">Logout</a></li>
           </ul>
@@ -48,9 +51,21 @@
   </header>
 
   <article class="main-content">
+    <!-- 1. HOME SECTION -->
     <section id="page-home" class="page-section active">
       <div class="home-layout">
-        <div id="balance-card-slot"></div>
+
+        <!-- === RESTORED BALANCE CARD HERE === -->
+        <div id="balance-card-slot">
+          <div class="balance-card">
+            <div id="text-content">
+              <p class="balance-title">Total Balance</p>
+              <h1 id="balance-amount" class="balance-amount">Rp0</h1>
+              <p class="balance-greeting">Hello, <span id="user-greeting-name">Guest</span>!</p>
+            </div>
+          </div>
+        </div>
+
         <div class="home-right-panel">
           <div id="transaction-navigation" role="grid">
             <div id="quick-filter" role="rowgroup">
@@ -74,6 +89,7 @@
       </div>
     </section>
 
+    <!-- 2. HISTORY SECTION -->
     <section id="page-history" class="page-section">
       <div id="transaction-listing-container">
         <div class="list-header">
@@ -85,6 +101,7 @@
       </div>
     </section>
 
+    <!-- 3. ANALYZE SECTION -->
     <section id="page-analyze" class="page-section">
       <div class="analyze-header">
         <h2>Financial Overview</h2>
@@ -164,6 +181,7 @@
       </div>
     </section>
 
+    <!-- 4. FAQ SECTION -->
     <section id="page-faq" class="page-section">
       <div class="faq-wrapper">
         <h2 class="section-title">Frequently Asked Questions</h2>
@@ -180,6 +198,7 @@
     </section>
   </article>
 
+  <!-- === OVERLAYS & MODALS === -->
   <div id="page-tx" class="tx-page-overlay">
     <div class="tx-page-content">
       <header class="tx-page-header">
@@ -210,6 +229,7 @@
     </div>
   </div>
 
+  <!-- Modals -->
   <div id="category-modal" class="modal-backdrop hidden">
     <div id="category-modal-content" class="modal-content-sheet">
       <div class="modal-sheet-header">
@@ -232,7 +252,39 @@
       <p id="alert-message"></p><button id="btn-close-alert" class="modal-alert-btn">Close</button>
     </div>
   </div>
+  <div id="datepicker-modal" class="modal-backdrop hidden">
+    <div class="modal-content-datepicker">
+      <div class="datepicker-header"><button id="datepicker-prev-month">&lt;</button>
+        <div id="datepicker-month-year">Month Year</div><button id="datepicker-next-month">&gt;</button>
+      </div>
+      <div class="datepicker-weekdays">
+        <div>SEN</div>
+        <div>SEL</div>
+        <div>RAB</div>
+        <div>KAM</div>
+        <div>JUM</div>
+        <div>SAB</div>
+        <div>MIN</div>
+      </div>
+      <div id="datepicker-days-grid" class="datepicker-days-grid"></div>
+    </div>
+  </div>
+  <div id="timepicker-modal" class="modal-backdrop hidden">
+    <div class="modal-content-timepicker">
+      <h3 class="timepicker-title">Time Picker</h3>
+      <div class="timepicker-controls">
+        <div class="timepicker-column"><button id="time-hour-up" class="timepicker-btn">^</button><span
+            id="time-hour-display">12</span><button id="time-hour-down" class="timepicker-btn">v</button></div>
+        <span class="timepicker-separator">:</span>
+        <div class="timepicker-column"><button id="time-minute-up" class="timepicker-btn">^</button><span
+            id="time-minute-display">00</span><button id="time-minute-down" class="timepicker-btn">v</button></div>
+        <div class="timepicker-ampm"><button id="time-ampm-am">AM</button><button id="time-ampm-pm">PM</button></div>
+      </div>
+      <button id="btn-set-time" class="modal-set-btn">Set Time</button>
+    </div>
+  </div>
 
+  <!-- Scripts -->
   <script type="module" src="../scripts/main.js"></script>
 </body>
 
