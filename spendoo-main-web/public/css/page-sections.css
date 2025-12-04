@@ -2,236 +2,88 @@
 #scroll-container, 
 #page-faq,
 .activity-scroll {
-    /* Firefox */
     scrollbar-width: none; 
-    
-    /* IE and Edge */
     -ms-overflow-style: none; 
 }
-
-/* Chrome, Safari, and Opera */
 #home-scroll-container::-webkit-scrollbar, 
 #scroll-container::-webkit-scrollbar, 
 #page-faq::-webkit-scrollbar,
 .activity-scroll::-webkit-scrollbar {
     display: none;
 }
-
 .page-section {
-    display: none; /* Hidden by default */
+    display: none;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
-
-/* Only show the active section */
 .page-section.active {
     display: block;
     opacity: 1;
     animation: fadeIn 0.2s ease-out;
 }
-
 @keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-5px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
-    }
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.page-section h2 {
-    max-height: 20dvh;
-    padding: 48px 24px;
-    margin: 0;
-    font-size: 48px;
-    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* =========================================
-   2. HISTORY PAGE STYLES
-   ========================================= */
-#history-content-slot {
-    display: flex;
-    flex-direction: column;
-}
-
-.history-banner {
-    display: flex;
-    align-items: center;
-    background: var(--bg-card, #1a3c2b); /* Fallback or variable */
-    padding: 20px;
-    border-radius: 12px;
-    border-left: 4px solid transparent;
-    transition: transform 0.2s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.history-banner:hover {
-    transform: translateX(5px);
-}
-
-/* Banner Variations */
-.history-banner.added { border-left-color: #2ecc71; }
-.history-banner.removed { border-left-color: #e74c3c; }
-.history-banner.edited { border-left-color: #f1c40f; }
-
-.banner-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 20px;
-    font-weight: bold;
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.added .banner-icon { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
-.removed .banner-icon { color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
-.edited .banner-icon { color: #f1c40f; background: rgba(241, 196, 15, 0.1); }
-
-.banner-info h4 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
-    color: var(--text-white, #fff);
-}
-
-.banner-info p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--text-muted, #aebdb4);
-}
-
-/* =========================================
-   3. ANALYZE PAGE STYLES
-   ========================================= */
-   /* === TAMBAHAN BARU: Agar background Analyze Full Screen === */
-/* === TAMBAHAN PENTING: AGAR CHART TIDAK 0 PIXEL === */
-/* === FIX: PAKSA TINGGI CHART AGAR MUNCUL === */
-
-/* 1. Untuk Chart Utama (Bar Chart) */
-/* === FIX TAMPILAN CHART === */
-.charts-wrapper.full-width {
-    /* Tinggi Pasti */
-    height: 400px !important; 
-    min-height: 400px;
-    width: 100%;
-    
-    /* GANTI DARI FLEX KE BLOCK/RELATIVE */
-    display: block; 
-    position: relative;
-    
-    /* Kosmetik */
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* Pastikan wadah kanvas memenuhi wrapper */
-.chart-view {
-    width: 100% !important;
-    height: 100% !important;
-    position: relative;
-    display: block; /* Pastikan block */
-}
-
-/* Fix untuk Donut agar tidak hilang */
-.canvas-wrapper-donut {
-    width: 250px !important;
-    height: 250px !important;
-    position: relative;
-    margin: 0 auto;
-}
-
-/* 3. Pastikan Layout Donut Rapi */
-.donut-layout {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 30px;
-    justify-content: center; /* Agar donut dan legend ada di tengah */
-}
-
-/* 3. Pastikan Page Analyze Full Screen */
+/* === ANALYZE PAGE STYLES === */
 #page-analyze {
-    min-height: 100dvh;
-    padding-bottom: 80px;
-}
-
-/* === PERBAIKAN LAYOUT ANALYZE (Supaya tidak putus & rapi) === */
-
-/* 1. Background Gelap Full Screen */
-#page-analyze {
-    min-height: 100dvh; /* Tinggi minimal setinggi layar */
+    min-height: 100dvh; 
     width: 100%;
     box-sizing: border-box;
     padding-bottom: 80px; 
     display: none; 
     flex-direction: column;
 }
-
 #page-analyze.active {
     display: flex; 
-    animation: fadeIn 0.3s ease-out; 
 }
 
-/* 2. Container Flex (Supaya Chart, Donut, Advice menyusun ke bawah) */
 #analyze-container-grid {
-    display: flex;       /* GANTI DARI GRID KE FLEX */
+    display: flex;       
     flex-direction: column;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;    
     padding: 0 24px;
-    gap: 40px;           /* Jarak antar elemen */
+    gap: 40px;           
     box-sizing: border-box;
-    overflow: hidden;
-
 }
 
-
-.financial-chart {
-    background-color: #022c1579;
-    border-radius: 12px;
+.charts-wrapper.full-width {
+    height: 400px !important; 
+    min-height: 400px;
+    width: 100%;
+    display: block; 
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 34.3dvh;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Responsive stack for smaller screens */
-@media (max-width: 900px) {
-    .analyze-container {
-        grid-template-columns: 1fr;
-    }
+.chart-view {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative;
+    display: block; 
 }
 
-
-/* === ANALYZE HEADER & TOGGLE === */
+/* Header & Toggles */
 .analyze-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 24px 24px 0 24px;
 }
-
 .toggle-view-container {
-    background: #142f22; /* Warna gelap background toggle */
+    background: #142f22;
     padding: 4px;
     border-radius: 20px;
     display: flex;
     gap: 5px;
     border: 1px solid rgba(255,255,255,0.1);
 }
-
 .toggle-btn {
     background: transparent;
     border: none;
@@ -240,16 +92,11 @@
     border-radius: 16px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s ease;
 }
-
 .toggle-btn.active {
-    background: #2ecc71; /* Hijau terang */
+    background: #2ecc71;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.4);
 }
-
-/* === DATE NAVIGATOR (< Month >) === */
 .date-navigator-container {
     display: flex;
     align-items: center;
@@ -257,7 +104,6 @@
     gap: 20px;
     margin: 20px 0;
 }
-
 .nav-arrow {
     background: transparent;
     border: 1px solid rgba(255,255,255,0.2);
@@ -270,11 +116,6 @@
     align-items: center;
     justify-content: center;
 }
-
-.nav-arrow:hover {
-    background: rgba(255,255,255,0.1);
-}
-
 #chart-period-label {
     font-size: 1.2rem;
     font-weight: bold;
@@ -283,8 +124,7 @@
     text-align: center;
 }
 
-
-/* === EMPTY STATE STYLING === */
+/* Empty State */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -293,168 +133,47 @@
     text-align: center;
     width: 100%;
     height: 100%;
-    animation: fadeIn 0.5s ease;
 }
+.empty-state.hidden { display: none !important; }
 
-.empty-state.hidden {
-    display: none !important;
-}
-
-.empty-icon {
-    margin-bottom: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 20px;
-    border-radius: 50%;
-}
-
-.empty-state h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.2rem;
-    color: #fff;
-    font-weight: 600;
-}
-
-.empty-state p {
-    margin: 0 0 24px 0;
-    color: #aebdb4;
-    font-size: 0.95rem;
-}
-
-.btn-cta-small {
-    background-color: #2ecc71;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    font-weight: 600;
-    transition: transform 0.2s, background 0.2s;
-}
-
-.btn-cta-small:hover {
-    background-color: #27ae60;
-    transform: translateY(-2px);
-}
-
-/* === BREAKDOWN SECTION (DONUT CHARTS) === */
+/* Breakdown & Donut */
 .breakdown-grid {
     display: grid;
-    grid-template-columns: 1fr; /* Stacked on mobile */
+    grid-template-columns: 1fr;
     gap: 40px;
-    margin-top: 40px;
-    padding-bottom: 40px;
     width: 100%;
 }
-
-@media (min-width: 900px) {
-    .breakdown-grid {
-        grid-template-columns: 1fr; /* Tetap 1 kolom agar lebar, atau ubah 1fr 1fr jika ingin berdampingan */
-    }
-}
-
 .breakdown-card {
-    background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 24px;
 }
-
-.breakdown-title {
-    font-size: 1.1rem;
-    color: #fff;
-    margin-bottom: 20px;
-    font-weight: 400;
-}
-
-.breakdown-title span.text-income { color: #2ecc71; font-weight: bold; }
-.breakdown-title span.text-expense { color: #e74c3c; font-weight: bold; }
-
-/* Summary & Total */
-.breakdown-summary {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 5px;
-}
-
-.total-label {
-    font-size: 1rem;
-    color: #2ecc71; /* Default income green */
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.total-label.text-expense { color: #e74c3c; }
-
-.total-value {
-    font-size: 2.5rem;
-    color: #fff;
-    font-weight: 400;
-}
-
-/* Comparison Text */
-.comparison-text {
-    font-size: 0.9rem;
-    margin-bottom: 30px;
-    color: #aebdb4;
-}
-
-.comparison-text .arrow { margin-right: 5px; }
-.comparison-text.up .arrow { color: #2ecc71; }
-.comparison-text.down .arrow { color: #e74c3c; }
-
-/* Donut Layout */
+.breakdown-title { font-size: 1.1rem; color: #fff; margin-bottom: 20px; }
+.breakdown-title span.text-income { color: #2ecc71; }
+.breakdown-title span.text-expense { color: #e74c3c; }
 .donut-layout {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 40px;
 }
-
-.canvas-wrapper-donut {
-    width: 200px;
-    height: 200px;
-    position: relative;
-}
-
-/* Custom Legend Grid */
+.canvas-wrapper-donut { width: 200px; height: 200px; position: relative; }
 .custom-legend-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 Kolom seperti di screenshot */
+    grid-template-columns: 1fr 1fr; 
     gap: 15px 30px;
     flex: 1;
 }
+.legend-item { display: flex; align-items: center; gap: 10px; color: #fff; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.25rem;
-    color: #ffffff;
-}
-
-.legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.breakdown-grid.hidden { display: none; }
-
-/* === ADVICE & GRADING STYLES === */
+/* Advice & Grades */
 .advice-wrapper {
-    width: 95dvw;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    padding: 0px 24px; /* Ruang extra di bawah */
     animation: fadeIn 0.5s ease-out;
 }
-
 .advice-wrapper.hidden { display: none; }
-
-/* --- 1. GRADE CARD (TROPHY) --- */
 .grade-card {
     display: flex;
     align-items: center;
@@ -462,304 +181,49 @@
     padding: 30px;
     border-radius: 16px;
     color: #fff;
-    background: #333; /* Default */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    transition: background 0.5s ease;
+    background: #333;
 }
+.grade-card.excellent { background: linear-gradient(135deg, #2ecc71, #219150); }
+.grade-card.good { background: linear-gradient(135deg, #3498db, #2980b9); }
+.grade-card.fair { background: linear-gradient(135deg, #f1c40f, #d35400); }
+.grade-card.poor { background: linear-gradient(135deg, #e74c3c, #c0392b); }
 
-/* Warna Grade Dinamis */
-.grade-card.excellent { background: linear-gradient(135deg, #2ecc71, #219150); } /* Hijau */
-.grade-card.good { background: linear-gradient(135deg, #3498db, #2980b9); }      /* Biru */
-.grade-card.fair { background: linear-gradient(135deg, #f1c40f, #d35400); }      /* Kuning/Oranye */
-.grade-card.poor { background: linear-gradient(135deg, #e74c3c, #c0392b); }      /* Merah */
-
-.grade-icon-wrapper svg {
-    width: 70px;
-    height: 70px;
-    stroke: #fff;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-}
-
-.grade-content h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.8rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.grade-content p {
-    margin: 0;
-    font-size: 1rem;
-    opacity: 0.95;
-    line-height: 1.5;
-}
-
-/* --- 2. ADVICE CARDS --- */
-.advice-section-title {
-    color: #fff;
-    font-size: 1.1rem;
-    margin-top: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 10px;
-}
-
-.advice-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-}
-
+.advice-grid { display: grid; gap: 16px; }
 .advice-card {
-    background: rgba(255, 255, 255, 0.05); /* Semi transparan */
-    border-left: 5px solid #ccc; /* Warna indikator di kiri */
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 5px solid #ccc;
     border-radius: 10px;
     padding: 20px;
     display: flex;
     gap: 16px;
-    align-items: flex-start;
-    transition: transform 0.2s;
 }
-
-.advice-card:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.08);
-}
-
 .advice-icon-box {
-    min-width: 48px;
-    height: 48px;
+    min-width: 48px; height: 48px;
     border-radius: 10px;
     background: rgba(255,255,255,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem; /* Ukuran emoji/icon */
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
 }
-
 .advice-details { flex: 1; }
+.advice-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.advice-cat-name { font-weight: 700; color: #fff; }
+.advice-text { color: #aebdb4; margin: 0; }
 
-.advice-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.advice-cat-name {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff;
-}
-
-.advice-trend {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #e74c3c; /* Default merah (buruk) */
-}
-.advice-trend.positive { color: #2ecc71; } /* Hijau (baik) */
-
-.advice-text {
-    font-size: 0.9rem;
-    color: #aebdb4;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* Responsif untuk layar kecil */
-@media (max-width: 600px) {
-    .grade-card { flex-direction: column; text-align: center; }
-}
-/* =========================================
-   4. FAQ PAGE STYLES - REVAMPED
-   ========================================= */
-
-#page-faq {
-    justify-content: center;
-    padding: 40px 20px;
-    width: 100%;
-    height: 89dvh;
-    box-sizing: border-box;
-    overflow-y: auto;
-}
-
-#page-faq.active {
-    display: flex;
-    flex-direction: column; 
-    align-items: center;    
-}
-
-.faq-wrapper {
-    width: 100%;
-    max-height: 67dvh; /* Membatasi lebar agar nyaman dibaca */
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.section-title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 2rem;
-    color: #fff;
-    font-weight: 700;
-}
-
-/* --- Category Group Styling --- */
-.faq-category {
-    margin-bottom: 10px;
-}
-
-.category-title {
-    font-size: 1.1rem;
-    color: #2ecc71; /* Warna hijau aksen */
-    margin-bottom: 15px;
-    padding-left: 5px;
-    border-left: 3px solid #2ecc71;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* --- Accordion Item Styling --- */
-details.faq-item {
-    background: var(--bg-card, #142f22);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-}
-
-details.faq-item:hover {
-    border-color: rgba(46, 204, 113, 0.4);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-/* --- Summary (Pertanyaan) --- */
-summary {
-    padding: 18px 20px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 1rem; /* Ukuran font standar yang nyaman (sekitar 16px) */
-    color: var(--text-white, #fff);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    list-style: none;
-    user-select: none;
-}
-
-/* Menghilangkan panah default browser */
-summary::-webkit-details-marker {
-    display: none;
-}
-
-summary:hover {
-    background: rgba(255,255,255,0.03);
-}
-
-/* Custom Icon (+ / -) */
-summary::after {
-    content: '+';
-    color: #2ecc71;
-    font-size: 1.5rem;
-    font-weight: 300;
-    margin-left: 10px;
-    transition: transform 0.3s ease;
-}
-
-details[open] summary::after {
-    content: '-';
-    color: #e74c3c;
-    transform: rotate(180deg);
-}
-
-details[open] summary {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(0, 0, 0, 0.1);
-}
-
-/* --- Content (Jawaban) --- */
-.faq-content {
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.15); /* Background sedikit lebih gelap */
-    color: #d1dcd5; /* Warna teks tidak pure white agar mata tidak lelah */
-    font-size: 0.95rem;
-    line-height: 1.6;
-}
-
-.faq-content p {
-    margin: 0 0 10px 0;
-}
-
-.faq-content p:last-child {
-    margin-bottom: 0;
-}
-
-.faq-content ul {
-    margin: 0;
-    padding-left: 20px;
-}
-
-.faq-content li {
-    margin-bottom: 5px;
-
-}
-
-/* === HOME PAGE LAYOUT FIX === */
-
-/* The container that holds Left (Card) and Right (Table) */
+/* Home Layout Fix */
 .home-layout {
   display: flex;
   flex-direction: row;
-  gap: 24px; /* Space between card and table */
+  gap: 24px;
   width: 100%;
-  height: 100%;
 }
-
-/* Left Column: Balance Card Slot */
-#balance-card-slot {
-    position: relative;
-/* Don't stretch, just fit content */
-  width: fit-content;   /* Fixed width for the card */
-}
-
-/* Right Column: Wrapper for Nav + Table */
-.home-right-panel {      /* Take up all remaining space */
+#balance-card-slot { width: fit-content; }
+.home-right-panel {
   display: flex;
   flex-direction: column;
-  min-width: 0;   /* Prevents flex items from overflowing horizontally */
+  min-width: 0;
   width: 67dvw;
-
 }
-#page-home {
-    display: flex;
-    width: 96dvw;
-}
-/* Adjust table container to fill the right panel */
-#page-home #transaction-listing-container {
-  width: 100%;    /* Fill the right panel */
-  /* padding: 0;     Remove padding if it messes up alignment */
-}
-#page-history #transaction-listing-container {
-    align-self: center;
-    width: 96dvw;
-}
-
-/* Ensure the scroll area takes available height */
-#page-home .activity-scroll {
-  height: 76dvh; /* Adjust height as needed */
-  overflow-x: hidden;
-}
-
-/* Mobile Responsiveness: Stack them on small screens */
+#page-home #transaction-listing-container { width: 100%; }
 @media (max-width: 900px) {
-  .home-layout {
-    flex-direction: column;
-  }
-  
-  #balance-card-slot {
-    width: 100%;
-  }
+  .home-layout { flex-direction: column; }
+  #balance-card-slot { width: 100%; }
 }

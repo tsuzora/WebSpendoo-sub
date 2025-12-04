@@ -1,80 +1,57 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spendoo | Dashboard</title>
 
-    <!-- External Stylesheets -->
-    <link rel="stylesheet" href="../css/variables.css" />
-    <link rel="stylesheet" href="../css/root-style.css" />
-    <link rel="stylesheet" href="../css/main-layout-style.css" />
-    <link rel="stylesheet" href="../css/component-style.css" />
-    <link rel="stylesheet" href="../css/overlay-style.css" />
-    <link rel="stylesheet" href="../css/page-sections.css" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendoo | Dashboard</title>
 
-  <body>
-    <!-- === NAVBAR === -->
-    <header class="navbar">
-      <div class="navbar-left">
-        <h1 class="logo">Spendoo</h1>
-        <nav class="nav-links">
-          <!-- Navigation Links with Data Targets -->
-          <a href="#" class="nav-link active" data-target="home">Home</a>
-          <a href="#" class="nav-link" data-target="history">History</a>
-          <a href="#" class="nav-link" data-target="analyze">Analyze</a>
-          <a href="#" class="nav-link" data-target="faq">FAQ</a>
-        </nav>
-      </div>
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/root-style.css" />
+  <link rel="stylesheet" href="../css/main-layout-style.css" />
+  <link rel="stylesheet" href="../css/component-style.css" />
+  <link rel="stylesheet" href="../css/overlay-style.css" />
+  <link rel="stylesheet" href="../css/page-sections.css" />
+</head>
 
-      <div class="navbar-right">
-        <!-- The Expandable Container -->
-        <div id="profileContainer" class="profile-container">
-          <!-- 1. Header (Always Visible) -->
-          <div class="profile-header">
-            <!-- Profile Image -->
-            <img
-              src="../assets/img/user.png"
-              alt="User Profile"
-              class="profile-img"
-            />
+<body>
+  <header class="navbar">
+    <div class="navbar-left">
+      <h1 class="logo">Spendoo</h1>
+      <nav class="nav-links">
+        <a href="#" class="nav-link active" data-target="home">Home</a>
+        <a href="#" class="nav-link" data-target="history">History</a>
+        <a href="#" class="nav-link" data-target="analyze">Analyze</a>
+        <a href="#" class="nav-link" data-target="faq">FAQ</a>
+      </nav>
+    </div>
 
-            <!-- Username -->
-            <span class="username">Guest</span>
-
-            <!-- Arrow Icon -->
-            <span class="dropdown-arrow">▼</span>
+    <div class="navbar-right">
+      <div id="profileContainer" class="profile-container">
+        <div class="profile-header">
+          <img src="../assets/img/user.png" alt="User Profile" class="profile-img" id="profilePic" />
+          <span class="username" id="userName">Guest</span>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+        <div class="profile-dropdown-content">
+          <div class="dropdown-header">
+            <p class="user-email">Account Settings</p>
           </div>
-
-          <!-- 2. Dropdown Menu (Hidden by default, slides down) -->
-          <div class="profile-dropdown-content">
-            <div class="dropdown-header">
-              <p class="user-email">guest@spendoo.com</p>
-            </div>
-            <ul class="dropdown-list">
-              <li><a href="#">Settings</a></li>
-              <li><a href="#">Export Data</a></li>
-              <!-- Divider Line -->
-              <li class="divider"></li>
-              <!-- Logout Link -->
-              <li><a href="#" id="logoutBtn" class="danger-text">Logout</a></li>
-            </ul>
-          </div>
+          <ul class="dropdown-list">
+            <li><a href="#">Settings</a></li>
+            <li class="divider"></li>
+            <li><a href="#" id="logoutBtn" class="danger-text">Logout</a></li>
+          </ul>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
   <article class="main-content">
-
     <section id="page-home" class="page-section active">
-    
       <div class="home-layout">
-    
         <div id="balance-card-slot"></div>
-    
         <div class="home-right-panel">
-    
           <div id="transaction-navigation" role="grid">
             <div id="quick-filter" role="rowgroup">
               <p style="color: var(--sp-green); font-weight: 700; margin-bottom: 10px;">Quick Navigation</p>
@@ -85,326 +62,178 @@
               </div>
             </div>
           </div>
-    
           <div id="transaction-listing-container" role="grid">
             <div class="list-header" role="rowgroup">
               <p class="col-header" role="columnheader">Name</p>
               <p class="col-header" role="columnheader">Amount</p>
               <p class="col-header" role="columnheader">Date Added</p>
             </div>
-    
             <div id="home-scroll-container" class="activity-scroll" role="rowgroup"></div>
           </div>
-    
         </div>
-    
       </div>
     </section>
 
-      <!-- 2. HISTORY SECTION -->
-      <section id="page-history" class="page-section">
-        <!-- Slot for History Banners -->
-        <div id="transaction-listing-container">
-          <div class="list-header">
-            <div id="col-header">Category</div>
-            <div id="col-header">Date</div>
-            <div id="col-header">Amount</div>
-          </div>
-        
-          <div id="scroll-container">
-          </div></div>
-      </section>
+    <section id="page-history" class="page-section">
+      <div id="transaction-listing-container">
+        <div class="list-header">
+          <div id="col-header">Category</div>
+          <div id="col-header">Date</div>
+          <div id="col-header">Amount</div>
+        </div>
+        <div id="scroll-container"></div>
+      </div>
+    </section>
 
-      <!-- 3. ANALYZE SECTION -->
-      <section id="page-analyze" class="page-section">
+    <section id="page-analyze" class="page-section">
+      <div class="analyze-header">
         <h2>Financial Overview</h2>
-        <!-- Balance Card Reuse Slot -->
-        <div id="analyze-container-grid" role="row">
-          <div class="analyze-container">
-            <div class="analyze-card-container"></div>
+        <div class="toggle-view-container">
+          <button id="btn-view-monthly" class="toggle-btn active">Monthly</button>
+          <button id="btn-view-yearly" class="toggle-btn">Yearly</button>
+        </div>
+      </div>
 
-            <!-- Canvas for Charts -->
-            <div class="charts-wrapper">
-              <canvas id="financialChart" width="600" height="400"></canvas>
+      <div class="date-navigator-container">
+        <button id="btn-chart-prev" class="nav-arrow">&lt;</button>
+        <span id="chart-period-label">August 2025</span>
+        <button id="btn-chart-next" class="nav-arrow">&gt;</button>
+      </div>
+
+      <div id="analyze-container-grid" role="row">
+        <div class="charts-wrapper full-width">
+          <div id="chart-canvas-container" class="chart-view">
+            <canvas id="financialChart"></canvas>
+          </div>
+          <div id="chart-empty-state" class="empty-state hidden">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                stroke="#4a6b5d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <h3 id="empty-state-title">No Data</h3>
+            <p id="empty-state-desc">You haven't added any transactions yet.</p>
+          </div>
+        </div>
+
+        <div id="breakdown-section" class="breakdown-grid hidden">
+          <div class="breakdown-card">
+            <h4 class="breakdown-title">Here’s What You’ve <span class="text-income">Gained</span> in <span
+                class="period-name">August</span></h4>
+            <div class="breakdown-summary">
+              <div class="total-label">TOTAL:</div>
+              <div class="total-value" id="income-total-display">Rp0</div>
+            </div>
+            <div class="comparison-text" id="income-comparison">...</div>
+            <div class="donut-layout">
+              <div class="canvas-wrapper-donut"><canvas id="incomeDonutChart"></canvas></div>
+              <div id="income-legend" class="custom-legend-grid"></div>
             </div>
           </div>
 
-          <div class="financial-chart"></div>
-        </div>
-      </section>
-
-      <!-- 4. FAQ SECTION -->
-      <section id="page-faq" class="page-section">
-        <div class="faq-wrapper">
-          <h2 class="section-title">Frequently Asked Questions</h2>
-      
-          <div class="faq-category">
-            <h3 class="category-title">Akun & Keamanan</h3>
-      
-            <details class="faq-item">
-              <summary>Apa perbedaan antara "Continue as Guest" dan "Login"?</summary>
-              <div class="faq-content">
-                <p><strong>Guest Mode (Tamu):</strong> Anda bisa langsung mencoba fitur tanpa mendaftar. Data hanya tersimpan
-                  sementara di perangkat ini dan akan hilang jika cache dihapus.</p>
-                <p><strong>Login (Terdaftar):</strong> Data tersimpan aman di Cloud. Anda bisa mengakses data keuangan dari
-                  perangkat mana saja tanpa takut hilang.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Apakah data keuangan saya aman?</summary>
-              <div class="faq-content">
-                <p>Ya, keamanan akses dibatasi secara ketat. Hanya Anda (pemilik akun) yang dapat melihat transaksi dan
-                  riwayat keuangan. Pengguna lain tidak memiliki akses ke data pribadi Anda.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Bagaimana cara mendaftar akun Spendoo?</summary>
-              <div class="faq-content">
-                <p>Klik tombol "Sign Up" pada halaman utama. Anda bisa mendaftar cepat menggunakan akun Google atau mengisi
-                  formulir pendaftaran dengan Email dan Password.</p>
-              </div>
-            </details>
-          </div>
-      
-          <div class="faq-category">
-            <h3 class="category-title">Transaksi & Kategori</h3>
-      
-            <details class="faq-item">
-              <summary>Mengapa saya harus memilih "Kategori" saat mencatat?</summary>
-              <div class="faq-content">
-                <p>Kategori penting agar fitur Analisis (Advice Page) bekerja optimal. Sistem memerlukan kategori untuk
-                  membuat Donut Chart yang menunjukkan ke mana uang Anda paling banyak dihabiskan.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Bisakah saya mengubah transaksi yang sudah disimpan?</summary>
-              <div class="faq-content">
-                <p>Ya. Buka menu <em>Transaction History</em>, cari transaksi yang ingin diubah, lalu klik pada transaksi
-                  tersebut untuk mengedit atau menghapusnya.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Data apa saja yang wajib diisi?</summary>
-              <div class="faq-content">
-                <ul>
-                  <li>Jumlah uang (Amount)</li>
-                  <li>Kategori (Category)</li>
-                  <li>Tanggal dan Waktu (Date & Time)</li>
-                  <li>Jenis Transaksi (Income atau Expense)</li>
-                </ul>
-              </div>
-            </details>
-          </div>
-      
-          <div class="faq-category">
-            <h3 class="category-title">Analisis & Laporan</h3>
-      
-            <details class="faq-item">
-              <summary>Cara melihat ringkasan pengeluaran bulan ini?</summary>
-              <div class="faq-content">
-                <p>Buka menu Dashboard atau Advice Page. Anda akan melihat Bar Chart perbandingan pemasukan vs pengeluaran,
-                  serta opsi filter berdasarkan Bulan atau Tahun.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Bisakah saya mengunduh data transaksi?</summary>
-              <div class="faq-content">
-                <p>Tentu. Gunakan fitur <strong>Export Data</strong> di menu pengaturan. Data akan diunduh dalam format .CSV
-                  yang kompatibel dengan Microsoft Excel atau Google Sheets.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Mengapa grafik analisis saya kosong?</summary>
-              <div class="faq-content">
-                <p>Grafik muncul jika ada data pada periode tersebut. Pastikan Anda sudah menginput transaksi dan memilih
-                  filter waktu (Bulan/Tahun) yang benar.</p>
-              </div>
-            </details>
-          </div>
-      
-          <div class="faq-category">
-            <h3 class="category-title"> Masalah Teknis</h3>
-      
-            <details class="faq-item">
-              <summary>Apakah Spendoo bisa digunakan tanpa internet?</summary>
-              <div class="faq-content">
-                <p>Tidak. Spendoo berbasis web dan membutuhkan koneksi internet untuk menyimpan data ke Cloud Firestore secara
-                  real-time (sinkronisasi) dan otentikasi akun.</p>
-              </div>
-            </details>
-      
-            <details class="faq-item">
-              <summary>Perangkat apa saja yang didukung?</summary>
-              <div class="faq-content">
-                <p>Spendoo dapat diakses melalui browser modern (Chrome, Firefox, Safari, Edge) di Desktop (Laptop/PC),
-                  Tablet, maupun Smartphone.</p>
-              </div>
-            </details>
-          </div>
-      
-        </div>
-      </section>
-    </article>
-
-    <!-- === OVERLAYS & MODALS === -->
-
-    <!-- Transaction Entry Overlay -->
-    <div id="page-tx" class="tx-page-overlay">
-      <div class="tx-page-content">
-        <!-- Header Halaman -->
-        <header class="tx-page-header">
-          <button id="btn-back-to-home" class="tx-page-back-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <h2 id="tx-page-title" class="tx-page-title">Add Transaction</h2>
-          <button id="btn-delete-tx" class="tx-page-delete-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          </button>
-        </header>
-  
-        <!-- Konten Form -->
-        <div class="tx-page-form-container">
-          <!-- Toggle Income/Expense -->
-          <div class="tx-type-toggle">
-            <button id="btn-tx-type-income" class="tx-type-btn">Income</button>
-            <button id="btn-tx-type-expense" class="tx-type-btn">Expense</button>
-          </div>
-  
-          <!-- Input Tanggal & Waktu -->
-          <div class="datetime-inputs">
-            <button id="btn-open-datepicker" class="datetime-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              <span id="tx-date-display">November 05, 2025</span>
-            </button>
-            <button id="btn-open-timepicker" class="datetime-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              <span id="tx-time-display">12:00 PM</span>
-            </button>
-          </div>
-  
-          <!-- Input Form -->
-          <div class="form-inputs">
-            <!-- Amount -->
-            <div class="form-input-group">
-              <label for="tx-amount">Amount</label>
-              <div class="amount-input-wrapper">
-                <span>Rp </span>
-                <input type="number" id="tx-amount" placeholder="0">
-              </div>
+          <div class="breakdown-card">
+            <h4 class="breakdown-title">Here’s What You’ve <span class="text-expense">Spent</span> in <span
+                class="period-name">August</span></h4>
+            <div class="breakdown-summary">
+              <div class="total-label text-expense">TOTAL:</div>
+              <div class="total-value" id="expense-total-display">Rp0</div>
             </div>
-            <!-- Category -->
-            <div class="form-input-group">
-              <label for="tx-category">Category</label>
-              <input type="text" id="tx-category" placeholder="Select category" readonly>
-            </div>
-            <!-- Payment Method (Sekarang akan selalu tampil) -->
-            <div id="payment-method-container" class="form-input-group">
-              <label for="tx-payment">Payment Method</label>
-              <input type="text" id="tx-payment" placeholder="Select payment method" readonly>
+            <div class="comparison-text" id="expense-comparison">...</div>
+            <div class="donut-layout">
+              <div class="canvas-wrapper-donut"><canvas id="expenseDonutChart"></canvas></div>
+              <div id="expense-legend" class="custom-legend-grid"></div>
             </div>
           </div>
         </div>
-  
-        <!-- Tombol Save -->
-        <div class="tx-page-footer">
-          <button id="btn-save-tx" class="save-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1B23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Alert Modal -->
-    <div id="alert-modal" class="modal-backdrop hidden">
-      <div class="modal-content-alert">
-        <h3 id="alert-title">Alert</h3>
-        <p id="alert-message">Message goes here.</p>
-        <button id="btn-close-alert" class="modal-alert-btn">Close</button>
-      </div>
-    </div>
-
-    <!-- Category Modal -->
-    <div id="category-modal" class="modal-backdrop hidden">
-      <div id="category-modal-content" class="modal-content-sheet">
-        <div class="modal-sheet-header">
-          <h3 id="category-modal-title">Category</h3>
-          <button id="btn-close-category-modal" class="modal-sheet-close">
-            X
-          </button>
-        </div>
-        <div id="category-grid" class="modal-sheet-grid"></div>
-      </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div id="payment-modal" class="modal-backdrop hidden">
-      <div id="payment-modal-content" class="modal-content-sheet">
-        <div class="modal-sheet-header">
-          <h3 class="modal-sheet-title">Payment Method</h3>
-          <button id="btn-close-payment-modal" class="modal-sheet-close">
-            X
-          </button>
-        </div>
-        <div id="payment-grid" class="modal-sheet-grid"></div>
-      </div>
-    </div>
-
-    <!-- Datepicker Modal -->
-    <div id="datepicker-modal" class="modal-backdrop hidden">
-      <div class="modal-content-datepicker">
-        <div class="datepicker-header">
-          <button id="datepicker-prev-month">&lt;</button>
-          <div id="datepicker-month-year">Month Year</div>
-          <button id="datepicker-next-month">&gt;</button>
-        </div>
-        <div class="datepicker-weekdays">
-          <div>SEN</div>
-          <div>SEL</div>
-          <div>RAB</div>
-          <div>KAM</div>
-          <div>JUM</div>
-          <div>SAB</div>
-          <div>MIN</div>
-        </div>
-        <div id="datepicker-days-grid" class="datepicker-days-grid"></div>
-      </div>
-    </div>
-
-    <!-- Timepicker Modal -->
-    <div id="timepicker-modal" class="modal-backdrop hidden">
-      <div class="modal-content-timepicker">
-        <h3 class="timepicker-title">Time Picker</h3>
-        <div class="timepicker-controls">
-          <div class="timepicker-column">
-            <button id="time-hour-up" class="timepicker-btn">^</button>
-            <span id="time-hour-display">12</span>
-            <button id="time-hour-down" class="timepicker-btn">v</button>
+        <div id="advice-section" class="advice-wrapper hidden">
+          <div id="grade-card" class="grade-card">
+            <div class="grade-icon-wrapper"></div>
+            <div class="grade-content">
+              <h3 id="grade-title">EXCELLENT!</h3>
+              <p id="grade-desc">...</p>
+            </div>
           </div>
-          <span class="timepicker-separator">:</span>
-          <div class="timepicker-column">
-            <button id="time-minute-up" class="timepicker-btn">^</button>
-            <span id="time-minute-display">00</span>
-            <button id="time-minute-down" class="timepicker-btn">v</button>
-          </div>
-          <div class="timepicker-ampm">
-            <button id="time-ampm-am">AM</button>
-            <button id="time-ampm-pm">PM</button>
-          </div>
+          <h4 class="advice-section-title">Insights & Advice</h4>
+          <div id="advice-grid" class="advice-grid"></div>
         </div>
-        <button id="btn-set-time" class="modal-set-btn">Set Time</button>
       </div>
-    </div>
+    </section>
 
-    <!-- Scripts -->
-    <script type="module" src="../scripts/main.js"></script>
-    <script src="../scripts/templates.js"></script>
-    <script src="../scripts/navigation.js"></script>
-  </body>
+    <section id="page-faq" class="page-section">
+      <div class="faq-wrapper">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="faq-category">
+          <h3 class="category-title">Akun & Keamanan</h3>
+          <details class="faq-item">
+            <summary>Apa perbedaan antara "Continue as Guest" dan "Login"?</summary>
+            <div class="faq-content">
+              <p>Guest Mode data hanya sementara. Login data tersimpan di Cloud.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </article>
+
+  <div id="page-tx" class="tx-page-overlay">
+    <div class="tx-page-content">
+      <header class="tx-page-header">
+        <button id="btn-back-to-home" class="tx-page-back-btn">Back</button>
+        <h2 id="tx-page-title" class="tx-page-title">Add Transaction</h2>
+        <button id="btn-delete-tx" class="tx-page-delete-btn">Delete</button>
+      </header>
+      <div class="tx-page-form-container">
+        <div class="tx-type-toggle">
+          <button id="btn-tx-type-income" class="tx-type-btn">Income</button>
+          <button id="btn-tx-type-expense" class="tx-type-btn">Expense</button>
+        </div>
+        <div class="datetime-inputs">
+          <button id="btn-open-datepicker" class="datetime-btn"><span id="tx-date-display">Date</span></button>
+          <button id="btn-open-timepicker" class="datetime-btn"><span id="tx-time-display">Time</span></button>
+        </div>
+        <div class="form-inputs">
+          <div class="form-input-group"><label>Amount</label>
+            <div class="amount-input-wrapper"><span>Rp </span><input type="number" id="tx-amount" placeholder="0"></div>
+          </div>
+          <div class="form-input-group"><label>Category</label><input type="text" id="tx-category" readonly
+              placeholder="Select"></div>
+          <div id="payment-method-container" class="form-input-group"><label>Payment</label><input type="text"
+              id="tx-payment" readonly placeholder="Select"></div>
+        </div>
+      </div>
+      <div class="tx-page-footer"><button id="btn-save-tx" class="save-btn">Save</button></div>
+    </div>
+  </div>
+
+  <div id="category-modal" class="modal-backdrop hidden">
+    <div id="category-modal-content" class="modal-content-sheet">
+      <div class="modal-sheet-header">
+        <h3 id="category-modal-title">Category</h3><button id="btn-close-category-modal">X</button>
+      </div>
+      <div id="category-grid" class="modal-sheet-grid"></div>
+    </div>
+  </div>
+  <div id="payment-modal" class="modal-backdrop hidden">
+    <div id="payment-modal-content" class="modal-content-sheet">
+      <div class="modal-sheet-header">
+        <h3 class="modal-sheet-title">Payment Method</h3><button id="btn-close-payment-modal">X</button>
+      </div>
+      <div id="payment-grid" class="modal-sheet-grid"></div>
+    </div>
+  </div>
+  <div id="alert-modal" class="modal-backdrop hidden">
+    <div class="modal-content-alert">
+      <h3 id="alert-title">Alert</h3>
+      <p id="alert-message"></p><button id="btn-close-alert" class="modal-alert-btn">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="../scripts/main.js"></script>
+</body>
+
 </html>
