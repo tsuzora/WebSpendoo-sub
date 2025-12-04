@@ -16,7 +16,7 @@ let unsubscribeFromFirestore = null;
 
 // === VARIABEL GLOBAL CHART ===
 let financialChartInstance = null;
-let analyzeViewMode = 'monthly'; // 'monthly' or 'yearly'
+let analyzeViewMode = "monthly"; // 'monthly' or 'yearly'
 let analyzeDate = new Date(); // Tanggal yang sedang dilihat di Analyze
 let incomeChartInstance = null;
 let expenseChartInstance = null;
@@ -74,17 +74,19 @@ const PAYMENT_METHODS = [
 ];
 const ADVICE_MESSAGES = {
   Food: "You're spending a lot on food. Try cooking at home more often.",
-  Transport: "Transport costs are high. Consider using public transport or carpooling.",
+  Transport:
+    "Transport costs are high. Consider using public transport or carpooling.",
   Shopping: "Shopping expenses are up. Maybe wait for sales or discounts?",
-  default_expense: "Your spending in this category has increased significantly.",
+  default_expense:
+    "Your spending in this category has increased significantly.",
 };
 const CAT_COLORS = {
-  Food: '#e67e22',
-  Transport: '#3498db',
-  Shopping: '#9b59b6',
-  Bills: '#e74c3c',
-  Salary: '#2ecc71',
-  Business: '#f1c40f'
+  Food: "#e67e22",
+  Transport: "#3498db",
+  Shopping: "#9b59b6",
+  Bills: "#e74c3c",
+  Salary: "#2ecc71",
+  Business: "#f1c40f",
 };
 
 // === SELEKTOR DOM ===
@@ -136,7 +138,7 @@ const btnCloseAlert = $("#btn-close-alert");
 
 function initApp(user) {
   currentUserId = user.uid;
-  
+
   const displayName = user.displayName || user.email?.split("@")[0] || "User";
   if (userNameDisplay) userNameDisplay.textContent = displayName;
   if (userGreetingName) userGreetingName.textContent = displayName;
@@ -151,7 +153,10 @@ function initApp(user) {
   if (loader) loader.classList.add("hidden");
 }
 
-const BASE_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://spendoo-backend.vercel.app";
+const BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://spendoo-backend.vercel.app";
 
 async function fetchTransactions() {
   if (!auth.currentUser) return;
@@ -173,7 +178,7 @@ async function fetchTransactions() {
       } else if (tx.date) {
         dateObj = new Date(tx.date);
       }
-      return { ...tx, date: dateObj }; 
+      return { ...tx, date: dateObj };
     });
 
     // Sort descending
@@ -182,10 +187,9 @@ async function fetchTransactions() {
     renderHomeTable();
     renderHistoryTable();
     calculateBalance();
-    
+
     // Refresh chart if we are on analyze page
     if (typeof updateChartData === "function") updateChartData();
-
   } catch (e) {
     console.error("Error fetching transactions:", e);
     showAlert("Error", "Gagal mengambil data: " + e.message);
@@ -206,7 +210,11 @@ function renderHomeTable() {
 
   recentTransactions.forEach((tx) => {
     let txDate = new Date(tx.date);
-    const dateStr = formatDate(txDate, { month: "short", day: "numeric", year: "numeric" });
+    const dateStr = formatDate(txDate, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     const amountStr = formatCurrency(tx.amount);
     const catObj = CATEGORIES[tx.type]?.find((c) => c.name === tx.category);
     const icon = catObj ? catObj.icon : ICONS.OTHERS;
@@ -218,10 +226,14 @@ function renderHomeTable() {
 
     row.innerHTML = `
       <div id="cell-name" role="gridcell">
-         <div style="width:24px; height:24px; color: ${tx.type === "income" ? "#2ecc71" : "#e74c3c"}">${icon}</div>
+         <div style="width:24px; height:24px; color: ${
+           tx.type === "income" ? "#2ecc71" : "#e74c3c"
+         }">${icon}</div>
          <span style="font-size:24px">${tx.category}</span>
       </div>
-      <div id="cell-amount" role="gridcell" style="color: ${tx.type === "income" ? "#2ecc71" : "#e74c3c"}">
+      <div id="cell-amount" role="gridcell" style="color: ${
+        tx.type === "income" ? "#2ecc71" : "#e74c3c"
+      }">
          ${tx.type === "expense" ? "-" : "+"} Rp${amountStr}
       </div>
       <div id="cell-date" role="gridcell">
@@ -238,7 +250,9 @@ function renderHistoryTable() {
   if (!scrollContainer) return;
   scrollContainer.innerHTML = "";
 
-  const historyData = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const historyData = [...transactions].sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
 
   if (historyData.length === 0) {
     scrollContainer.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--sp-gray);">No transactions yet.</div>`;
@@ -247,15 +261,24 @@ function renderHistoryTable() {
 
   historyData.forEach((tx) => {
     const txDate = new Date(tx.date);
-    const dateString = formatDate(txDate, { day: "numeric", month: "short", year: "numeric" });
+    const dateString = formatDate(txDate, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
     const amountString = formatCurrency(tx.amount);
-    const categoryObj = CATEGORIES[tx.type]?.find((c) => c.name === tx.category);
+    const categoryObj = CATEGORIES[tx.type]?.find(
+      (c) => c.name === tx.category
+    );
     const icon = categoryObj ? categoryObj.icon : ICONS.OTHERS;
 
     let editedHtml = "";
     if (tx.editedAt) {
       let editDate = new Date(tx.editedAt);
-      editedHtml = `<small style="display:block; font-size:0.75rem; color:#f1c40f; margin-top:4px;">Edited: ${formatDate(editDate, {day: 'numeric', month: 'short'})}</small>`;
+      editedHtml = `<small style="display:block; font-size:0.75rem; color:#f1c40f; margin-top:4px;">Edited: ${formatDate(
+        editDate,
+        { day: "numeric", month: "short" }
+      )}</small>`;
     }
 
     const row = document.createElement("div");
@@ -264,10 +287,16 @@ function renderHistoryTable() {
     row.innerHTML = `
       <div id="cell-name">
          <div style="width:32px; height:32px;">${icon}</div>
-         <span>${tx.category} <small style="opacity:0.6; display:block; font-size:0.8em;">${tx.paymentMethod}</small></span>
+         <span>${
+           tx.category
+         } <small style="opacity:0.6; display:block; font-size:0.8em;">${
+      tx.paymentMethod
+    }</small></span>
       </div>
       <div id="cell-date">${dateString} ${editedHtml}</div>
-      <div id="cell-amount" class="${tx.type === "income" ? "income" : "expense"}" style="font-weight:bold;">
+      <div id="cell-amount" class="${
+        tx.type === "income" ? "income" : "expense"
+      }" style="font-weight:bold;">
          ${tx.type === "expense" ? "-" : "+"} Rp${amountString}
       </div>
     `;
@@ -289,57 +318,73 @@ function calculateBalance() {
 
 // === FUNGSI CHART & ANALYZE ===
 function initChartPage() {
-    renderChartControls();
-    updateChartData();
+  renderChartControls();
+  updateChartData();
 }
 
 function renderChartControls() {
-    const label = document.getElementById('chart-period-label');
-    const btnMonthly = document.getElementById('btn-view-monthly');
-    const btnYearly = document.getElementById('btn-view-yearly');
+  const label = document.getElementById("chart-period-label");
+  const btnMonthly = document.getElementById("btn-view-monthly");
+  const btnYearly = document.getElementById("btn-view-yearly");
 
-    if (!label) return;
+  if (!label) return;
 
-    if (analyzeViewMode === 'monthly') {
-        label.textContent = formatDate(analyzeDate, { month: 'long', year: 'numeric' });
-        btnMonthly.classList.add('active');
-        btnYearly.classList.remove('active');
-    } else {
-        label.textContent = analyzeDate.getFullYear();
-        btnYearly.classList.add('active');
-        btnMonthly.classList.remove('active');
-    }
+  if (analyzeViewMode === "monthly") {
+    label.textContent = formatDate(analyzeDate, {
+      month: "long",
+      year: "numeric",
+    });
+    btnMonthly.classList.add("active");
+    btnYearly.classList.remove("active");
+  } else {
+    label.textContent = analyzeDate.getFullYear();
+    btnYearly.classList.add("active");
+    btnMonthly.classList.remove("active");
+  }
 }
 
 function renderCanvasChart(labels, incomeData, expenseData) {
-    const ctx = document.getElementById('financialChart');
-    if (!ctx) return;
+  const ctx = document.getElementById("financialChart");
+  if (!ctx) return;
 
-    if (financialChartInstance) financialChartInstance.destroy();
+  if (financialChartInstance) financialChartInstance.destroy();
 
-    try {
-        financialChartInstance = new Chart(ctx, {
-            type: 'bar', 
-            data: {
-                labels: labels,
-                datasets: [
-                    { label: 'Income', data: incomeData, backgroundColor: '#2ecc71', borderRadius: 4 },
-                    { label: 'Expense', data: expenseData, backgroundColor: '#e74c3c', borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { ticks: { color: '#aebdb4' }, grid: { display: false } },
-                    y: { ticks: { color: '#aebdb4' }, grid: { color: 'rgba(255,255,255,0.1)' } }
-                },
-                plugins: { legend: { labels: { color: '#fff' } } }
-            }
-        });
-    } catch (error) {
-        console.error("Gagal menggambar chart:", error);
-    }
+  try {
+    financialChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Income",
+            data: incomeData,
+            backgroundColor: "#2ecc71",
+            borderRadius: 4,
+          },
+          {
+            label: "Expense",
+            data: expenseData,
+            backgroundColor: "#e74c3c",
+            borderRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: "#aebdb4" }, grid: { display: false } },
+          y: {
+            ticks: { color: "#aebdb4" },
+            grid: { color: "rgba(255,255,255,0.1)" },
+          },
+        },
+        plugins: { legend: { labels: { color: "#fff" } } },
+      },
+    });
+  } catch (error) {
+    console.error("Gagal menggambar chart:", error);
+  }
 }
 
 function updateChartData() {
@@ -377,7 +422,20 @@ function updateChartData() {
   } else {
     // Yearly View
     const year = analyzeDate.getFullYear();
-    labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    labels = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     incomeData = new Array(12).fill(0);
     expenseData = new Array(12).fill(0);
     transactions.forEach((tx) => {
@@ -402,10 +460,10 @@ function updateChartData() {
     emptyStateContainer.style.display = "none";
     canvasContainer.classList.remove("hidden");
     canvasContainer.style.display = "block";
-    
+
     renderCanvasChart(labels, incomeData, expenseData);
     updateBreakdownSection();
-    
+
     const totalIncome = incomeData.reduce((a, b) => a + b, 0);
     const totalExpense = expenseData.reduce((a, b) => a + b, 0);
     updateAdviceSection(totalIncome, totalExpense);
@@ -413,227 +471,272 @@ function updateChartData() {
 }
 
 function updateBreakdownSection() {
-    const breakdownSection = document.getElementById('breakdown-section');
-    const periodNameEls = document.querySelectorAll('.period-name');
-    breakdownSection.classList.remove('hidden');
+  const breakdownSection = document.getElementById("breakdown-section");
+  const periodNameEls = document.querySelectorAll(".period-name");
+  breakdownSection.classList.remove("hidden");
 
-    const currentPeriodName = analyzeViewMode === 'monthly' ? formatDate(analyzeDate, { month: 'long' }) : analyzeDate.getFullYear();
-    periodNameEls.forEach(el => el.textContent = currentPeriodName);
+  const currentPeriodName =
+    analyzeViewMode === "monthly"
+      ? formatDate(analyzeDate, { month: "long" })
+      : analyzeDate.getFullYear();
+  periodNameEls.forEach((el) => (el.textContent = currentPeriodName));
 
-    processBreakdownData('income');
-    processBreakdownData('expense');
+  processBreakdownData("income");
+  processBreakdownData("expense");
 }
 
 function processBreakdownData(type) {
-    const currentData = getTransactionsByPeriod(analyzeDate, type);
-    const totalCurrent = currentData.reduce((sum, t) => sum + t.amount, 0);
+  const currentData = getTransactionsByPeriod(analyzeDate, type);
+  const totalCurrent = currentData.reduce((sum, t) => sum + t.amount, 0);
 
-    let prevDate = new Date(analyzeDate);
-    if (analyzeViewMode === 'monthly') prevDate.setMonth(prevDate.getMonth() - 1);
-    else prevDate.setFullYear(prevDate.getFullYear() - 1);
-    
-    const prevData = getTransactionsByPeriod(prevDate, type);
-    const totalPrev = prevData.reduce((sum, t) => sum + t.amount, 0);
+  let prevDate = new Date(analyzeDate);
+  if (analyzeViewMode === "monthly") prevDate.setMonth(prevDate.getMonth() - 1);
+  else prevDate.setFullYear(prevDate.getFullYear() - 1);
 
-    let percentage = 0;
-    if (totalPrev > 0) percentage = ((totalCurrent - totalPrev) / totalPrev) * 100;
-    else if (totalCurrent > 0) percentage = 100;
+  const prevData = getTransactionsByPeriod(prevDate, type);
+  const totalPrev = prevData.reduce((sum, t) => sum + t.amount, 0);
 
-    const totalDisplay = document.getElementById(`${type}-total-display`);
-    const compText = document.getElementById(`${type}-comparison`);
-    
-    totalDisplay.textContent = `Rp${formatCurrency(totalCurrent)}`;
-    const formattedPercent = Math.abs(percentage).toFixed(0);
-    const direction = percentage >= 0 ? 'increased' : 'decreased';
-    const arrow = percentage >= 0 ? '▲' : '▼';
-    const colorClass = percentage >= 0 ? 'up' : 'down';
-    
-    compText.className = `comparison-text ${colorClass}`;
-    compText.innerHTML = `<span class="arrow">${arrow}</span> Total ${type} ${direction} by <b>${formattedPercent}%</b>.`;
+  let percentage = 0;
+  if (totalPrev > 0)
+    percentage = ((totalCurrent - totalPrev) / totalPrev) * 100;
+  else if (totalCurrent > 0) percentage = 100;
 
-    const categoryMap = {};
-    currentData.forEach(tx => categoryMap[tx.category] = (categoryMap[tx.category] || 0) + tx.amount);
-    
-    const labels = Object.keys(categoryMap);
-    const dataValues = Object.values(categoryMap);
-    const bgColors = labels.map(cat => CAT_COLORS[cat] || '#999');
+  const totalDisplay = document.getElementById(`${type}-total-display`);
+  const compText = document.getElementById(`${type}-comparison`);
 
-    renderDonut(type, labels, dataValues, bgColors);
-    renderCustomLegend(type, labels, bgColors);
+  totalDisplay.textContent = `Rp${formatCurrency(totalCurrent)}`;
+  const formattedPercent = Math.abs(percentage).toFixed(0);
+  const direction = percentage >= 0 ? "increased" : "decreased";
+  const arrow = percentage >= 0 ? "▲" : "▼";
+  const colorClass = percentage >= 0 ? "up" : "down";
+
+  compText.className = `comparison-text ${colorClass}`;
+  compText.innerHTML = `<span class="arrow">${arrow}</span> Total ${type} ${direction} by <b>${formattedPercent}%</b>.`;
+
+  const categoryMap = {};
+  currentData.forEach(
+    (tx) =>
+      (categoryMap[tx.category] = (categoryMap[tx.category] || 0) + tx.amount)
+  );
+
+  const labels = Object.keys(categoryMap);
+  const dataValues = Object.values(categoryMap);
+  const bgColors = labels.map((cat) => CAT_COLORS[cat] || "#999");
+
+  renderDonut(type, labels, dataValues, bgColors);
+  renderCustomLegend(type, labels, bgColors);
 }
 
 function renderDonut(type, labels, data, colors) {
-    const ctx = document.getElementById(`${type}DonutChart`);
-    if (!ctx) return;
-    
-    if (type === 'income' && incomeChartInstance) { incomeChartInstance.destroy(); incomeChartInstance = null; }
-    if (type === 'expense' && expenseChartInstance) { expenseChartInstance.destroy(); expenseChartInstance = null; }
+  const ctx = document.getElementById(`${type}DonutChart`);
+  if (!ctx) return;
 
-    try {
-        const newChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: { legend: { display: false } }
-            }
-        });
-        if (type === 'income') incomeChartInstance = newChart;
-        else expenseChartInstance = newChart;
-    } catch (e) { console.error(e); }
+  if (type === "income" && incomeChartInstance) {
+    incomeChartInstance.destroy();
+    incomeChartInstance = null;
+  }
+  if (type === "expense" && expenseChartInstance) {
+    expenseChartInstance.destroy();
+    expenseChartInstance = null;
+  }
+
+  try {
+    const newChart = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: labels,
+        datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "70%",
+        plugins: { legend: { display: false } },
+      },
+    });
+    if (type === "income") incomeChartInstance = newChart;
+    else expenseChartInstance = newChart;
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function renderCustomLegend(type, labels, colors) {
-    const container = document.getElementById(`${type}-legend`);
-    container.innerHTML = '';
-    labels.forEach((label, index) => {
-        const item = document.createElement('div');
-        item.className = 'legend-item';
-        item.innerHTML = `<span class="legend-dot" style="background-color: ${colors[index]}"></span>${label}`;
-        container.appendChild(item);
-    });
+  const container = document.getElementById(`${type}-legend`);
+  container.innerHTML = "";
+  labels.forEach((label, index) => {
+    const item = document.createElement("div");
+    item.className = "legend-item";
+    item.innerHTML = `<span class="legend-dot" style="background-color: ${colors[index]}"></span>${label}`;
+    container.appendChild(item);
+  });
 }
 
 function getTransactionsByPeriod(dateObj, type) {
-    const year = dateObj.getFullYear();
-    const month = dateObj.getMonth();
-    return transactions.filter(tx => {
-        const txDate = new Date(tx.date);
-        const matchType = tx.type === type;
-        if (analyzeViewMode === 'monthly') return matchType && txDate.getFullYear() === year && txDate.getMonth() === month;
-        return matchType && txDate.getFullYear() === year;
-    });
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+  return transactions.filter((tx) => {
+    const txDate = new Date(tx.date);
+    const matchType = tx.type === type;
+    if (analyzeViewMode === "monthly")
+      return (
+        matchType &&
+        txDate.getFullYear() === year &&
+        txDate.getMonth() === month
+      );
+    return matchType && txDate.getFullYear() === year;
+  });
 }
 
 function updateAdviceSection(totalIncome, totalExpense) {
-    const adviceWrapper = document.getElementById('advice-section');
-    const gradeCard = document.getElementById('grade-card');
-    const gradeTitle = document.getElementById('grade-title');
-    const gradeDesc = document.getElementById('grade-desc');
-    const adviceGrid = document.getElementById('advice-grid');
+  const adviceWrapper = document.getElementById("advice-section");
+  const gradeCard = document.getElementById("grade-card");
+  const gradeTitle = document.getElementById("grade-title");
+  const gradeDesc = document.getElementById("grade-desc");
+  const adviceGrid = document.getElementById("advice-grid");
 
-    if (!adviceWrapper) return;
-    adviceWrapper.classList.remove('hidden');
+  if (!adviceWrapper) return;
+  adviceWrapper.classList.remove("hidden");
 
-    let savingsRate = 0;
-    if (totalIncome > 0) savingsRate = (totalIncome - totalExpense) / totalIncome;
-    else if (totalExpense > 0) savingsRate = -1; 
+  let savingsRate = 0;
+  if (totalIncome > 0) savingsRate = (totalIncome - totalExpense) / totalIncome;
+  else if (totalExpense > 0) savingsRate = -1;
 
-    gradeCard.className = 'grade-card';
-    if (savingsRate >= 0.4) {
-        gradeCard.classList.add('excellent');
-        gradeTitle.textContent = "EXCELLENT!";
-        gradeDesc.textContent = "Outstanding! You saved over 40% of your income.";
-    } else if (savingsRate >= 0.2) {
-        gradeCard.classList.add('good');
-        gradeTitle.textContent = "GOOD JOB!";
-        gradeDesc.textContent = "You're doing well by saving over 20%.";
-    } else if (savingsRate >= 0) {
-        gradeCard.classList.add('fair');
-        gradeTitle.textContent = "FAIR";
-        gradeDesc.textContent = "You are breaking even. Try to save more.";
-    } else {
-        gradeCard.classList.add('poor');
-        gradeTitle.textContent = "NEEDS ATTENTION";
-        gradeDesc.textContent = "Warning! Expenses exceed income.";
-    }
+  gradeCard.className = "grade-card";
+  if (savingsRate >= 0.4) {
+    gradeCard.classList.add("excellent");
+    gradeTitle.textContent = "EXCELLENT!";
+    gradeDesc.textContent = "Outstanding! You saved over 40% of your income.";
+  } else if (savingsRate >= 0.2) {
+    gradeCard.classList.add("good");
+    gradeTitle.textContent = "GOOD JOB!";
+    gradeDesc.textContent = "You're doing well by saving over 20%.";
+  } else if (savingsRate >= 0) {
+    gradeCard.classList.add("fair");
+    gradeTitle.textContent = "FAIR";
+    gradeDesc.textContent = "You are breaking even. Try to save more.";
+  } else {
+    gradeCard.classList.add("poor");
+    gradeTitle.textContent = "NEEDS ATTENTION";
+    gradeDesc.textContent = "Warning! Expenses exceed income.";
+  }
 
-    adviceGrid.innerHTML = '';
-    const currentCats = getCategorySums(analyzeDate);
-    
-    let prevDate = new Date(analyzeDate);
-    if (analyzeViewMode === 'monthly') prevDate.setMonth(prevDate.getMonth() - 1);
-    else prevDate.setFullYear(prevDate.getFullYear() - 1);
-    const prevCats = getCategorySums(prevDate);
-    
-    let adviceCount = 0;
-    for (const [key, amount] of Object.entries(currentCats)) {
-        const [type, catName] = key.split('_');
-        const prevAmount = prevCats[key] || 0;
-        let percentChange = 0;
-        if (prevAmount > 0) percentChange = ((amount - prevAmount) / prevAmount) * 100;
-        else if (amount > 0) percentChange = 100;
+  adviceGrid.innerHTML = "";
+  const currentCats = getCategorySums(analyzeDate);
 
-        let isBadTrend = false;
-        if (type === 'expense' && percentChange > 10 && amount > 50000) isBadTrend = true;
-        else if (type === 'income' && percentChange < -5) isBadTrend = true;
+  let prevDate = new Date(analyzeDate);
+  if (analyzeViewMode === "monthly") prevDate.setMonth(prevDate.getMonth() - 1);
+  else prevDate.setFullYear(prevDate.getFullYear() - 1);
+  const prevCats = getCategorySums(prevDate);
 
-        if (isBadTrend) {
-            adviceCount++;
-            let msg = ADVICE_MESSAGES[catName] || ADVICE_MESSAGES['default_expense'];
-            const indicatorColor = type === 'expense' ? '#e74c3c' : '#f1c40f';
-            const catObj = CATEGORIES[type]?.find(c => c.name === catName);
-            const iconSvg = catObj ? catObj.icon : '⚠️';
+  let adviceCount = 0;
+  for (const [key, amount] of Object.entries(currentCats)) {
+    const [type, catName] = key.split("_");
+    const prevAmount = prevCats[key] || 0;
+    let percentChange = 0;
+    if (prevAmount > 0)
+      percentChange = ((amount - prevAmount) / prevAmount) * 100;
+    else if (amount > 0) percentChange = 100;
 
-            const card = document.createElement('div');
-            card.className = 'advice-card';
-            card.style.borderLeftColor = indicatorColor;
-            card.innerHTML = `
+    let isBadTrend = false;
+    if (type === "expense" && percentChange > 10 && amount > 50000)
+      isBadTrend = true;
+    else if (type === "income" && percentChange < -5) isBadTrend = true;
+
+    if (isBadTrend) {
+      adviceCount++;
+      let msg = ADVICE_MESSAGES[catName] || ADVICE_MESSAGES["default_expense"];
+      const indicatorColor = type === "expense" ? "#e74c3c" : "#f1c40f";
+      const catObj = CATEGORIES[type]?.find((c) => c.name === catName);
+      const iconSvg = catObj ? catObj.icon : "⚠️";
+
+      const card = document.createElement("div");
+      card.className = "advice-card";
+      card.style.borderLeftColor = indicatorColor;
+      card.innerHTML = `
                 <div class="advice-icon-box" style="color: ${indicatorColor}">${iconSvg}</div>
                 <div class="advice-details">
                     <div class="advice-header">
                         <span class="advice-cat-name">${catName}</span>
                         <span class="advice-trend" style="color:${indicatorColor}">
-                            ${type === 'expense' ? '▲' : '▼'} ${Math.abs(percentChange).toFixed(0)}%
+                            ${type === "expense" ? "▲" : "▼"} ${Math.abs(
+        percentChange
+      ).toFixed(0)}%
                         </span>
                     </div>
                     <p class="advice-text">${msg}</p>
                 </div>
             `;
-            adviceGrid.appendChild(card);
-        }
+      adviceGrid.appendChild(card);
     }
-    if (adviceCount === 0) {
-        adviceGrid.innerHTML = `<div style="text-align:center; padding:20px; color:#fff;">No negative trends! Keep it up! 🎉</div>`;
-    }
+  }
+  if (adviceCount === 0) {
+    adviceGrid.innerHTML = `<div style="text-align:center; padding:20px; color:#fff;">No negative trends! Keep it up! 🎉</div>`;
+  }
 }
 
 function getCategorySums(dateObj) {
-    const sums = {};
-    const year = dateObj.getFullYear();
-    const month = dateObj.getMonth();
-    transactions.forEach(tx => {
-        const txDate = new Date(tx.date);
-        let match = false;
-        if (analyzeViewMode === 'monthly') match = (txDate.getFullYear() === year && txDate.getMonth() === month);
-        else match = (txDate.getFullYear() === year);
-        if (match) {
-            const key = `${tx.type}_${tx.category}`;
-            sums[key] = (sums[key] || 0) + tx.amount;
-        }
-    });
-    return sums;
+  const sums = {};
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+  transactions.forEach((tx) => {
+    const txDate = new Date(tx.date);
+    let match = false;
+    if (analyzeViewMode === "monthly")
+      match = txDate.getFullYear() === year && txDate.getMonth() === month;
+    else match = txDate.getFullYear() === year;
+    if (match) {
+      const key = `${tx.type}_${tx.category}`;
+      sums[key] = (sums[key] || 0) + tx.amount;
+    }
+  });
+  return sums;
 }
 
 function generateDummyData() {
-    console.log("Generating dummy data...");
-    transactions = []; 
-    const categories = { income: ['Salary', 'Bonus'], expense: ['Food', 'Transport', 'Shopping'] };
-    for (let i = 1; i <= 15; i++) {
-        const isExpense = Math.random() > 0.3;
-        const type = isExpense ? 'expense' : 'income';
-        const catList = categories[type];
-        const category = catList[Math.floor(Math.random() * catList.length)];
-        let amount = type === 'income' ? 2000000 : 50000;
-        const date = new Date(); // Use current date
-        date.setDate(i); 
-        transactions.push({ id: `dummy_${i}`, type, amount, category, paymentMethod: 'Cash', date: date });
-    }
-    analyzeDate = new Date();
-    if (typeof initChartPage === 'function') initChartPage();
-    if (typeof renderHomeTable === 'function') renderHomeTable();
-    if (typeof calculateBalance === 'function') calculateBalance();
+  console.log("Generating dummy data...");
+  transactions = [];
+  const categories = {
+    income: ["Salary", "Bonus"],
+    expense: ["Food", "Transport", "Shopping"],
+  };
+  for (let i = 1; i <= 15; i++) {
+    const isExpense = Math.random() > 0.3;
+    const type = isExpense ? "expense" : "income";
+    const catList = categories[type];
+    const category = catList[Math.floor(Math.random() * catList.length)];
+    let amount = type === "income" ? 2000000 : 50000;
+    const date = new Date(); // Use current date
+    date.setDate(i);
+    transactions.push({
+      id: `dummy_${i}`,
+      type,
+      amount,
+      category,
+      paymentMethod: "Cash",
+      date: date,
+    });
+  }
+  analyzeDate = new Date();
+  if (typeof initChartPage === "function") initChartPage();
+  if (typeof renderHomeTable === "function") renderHomeTable();
+  if (typeof calculateBalance === "function") calculateBalance();
 }
 
 // === HELPER FUNCTIONS ===
-function formatCurrency(value) { return new Intl.NumberFormat("id-ID").format(value); }
-function formatDate(date, options) { return date.toLocaleDateString("id-ID", options); }
-function formatTime(date) { return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }); }
+function formatCurrency(value) {
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+function formatDate(date, options) {
+  return date.toLocaleDateString("id-ID", options);
+}
+function formatTime(date) {
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 function openTxPage(mode, txId = null) {
   currentTxIdToEdit = mode === "edit" ? txId : null;
   if (mode === "edit") {
@@ -659,16 +762,29 @@ function openTxPage(mode, txId = null) {
   updateDateTimeDisplay();
   pageTx.classList.add("show");
 }
-function closeTxPage() { pageTx.classList.remove("show"); currentTxIdToEdit = null; }
+function closeTxPage() {
+  pageTx.classList.remove("show");
+  currentTxIdToEdit = null;
+}
 function updateTxType(type) {
   currentTxType = type;
-  if (type === "income") { btnTxTypeIncome.classList.add("income-active"); btnTxTypeExpense.classList.remove("expense-active"); } 
-  else { btnTxTypeExpense.classList.add("expense-active"); btnTxTypeIncome.classList.remove("income-active"); }
+  if (type === "income") {
+    btnTxTypeIncome.classList.add("income-active");
+    btnTxTypeExpense.classList.remove("expense-active");
+  } else {
+    btnTxTypeExpense.classList.add("expense-active");
+    btnTxTypeIncome.classList.remove("income-active");
+  }
   paymentMethodContainer.style.display = "block";
-  txCategory.value = ""; txPayment.value = "";
+  txCategory.value = "";
+  txPayment.value = "";
 }
 function updateDateTimeDisplay() {
-  txDateDisplay.textContent = formatDate(currentTxDate, { year: "numeric", month: "long", day: "numeric" });
+  txDateDisplay.textContent = formatDate(currentTxDate, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   txTimeDisplay.textContent = formatTime(currentTxDate);
 }
 async function saveTransaction() {
@@ -676,29 +792,64 @@ async function saveTransaction() {
   const category = txCategory.value;
   const paymentMethod = txPayment.value;
   const jsDate = currentTxDate;
-  if (!amount || amount <= 0 || !category || !paymentMethod) { showAlert("Input Salah", "Lengkapi data."); return; }
-  
-  const txData = { type: currentTxType, amount, category, paymentMethod, date: jsDate.getDate(), month: jsDate.toLocaleDateString("en-US", { month: "long" }), year: jsDate.getFullYear(), userID: currentUserId || "guest" };
-  
+  if (!amount || amount <= 0 || !category || !paymentMethod) {
+    showAlert("Input Salah", "Lengkapi data.");
+    return;
+  }
+
+  const txData = {
+    type: currentTxType,
+    amount,
+    category,
+    paymentMethod,
+    date: jsDate.getDate(),
+    month: jsDate.toLocaleDateString("en-US", { month: "long" }),
+    year: jsDate.getFullYear(),
+    userID: currentUserId || "guest",
+  };
+
   btnSaveTx.disabled = true;
   try {
-      const user = auth.currentUser;
-      if (!user) {
-          const guestTx = { id: currentTxIdToEdit || "guest_" + Date.now(), ...txData, date: jsDate };
-          if (currentTxIdToEdit) { const idx = transactions.findIndex(t => t.id === currentTxIdToEdit); if(idx !== -1) transactions[idx] = guestTx; }
-          else transactions.unshift(guestTx);
-          renderHomeTable(); renderHistoryTable(); calculateBalance(); closeTxPage();
-          if (typeof updateChartData === "function") updateChartData();
-          return;
-      }
-      // Server Logic
-      const token = await user.getIdToken();
-      const payload = { ...txData, date: jsDate.toISOString(), id: currentTxIdToEdit };
-      await fetch(`${BASE_URL}/api/transactions`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      await fetchTransactions();
+    const user = auth.currentUser;
+    if (!user) {
+      const guestTx = {
+        id: currentTxIdToEdit || "guest_" + Date.now(),
+        ...txData,
+        date: jsDate,
+      };
+      if (currentTxIdToEdit) {
+        const idx = transactions.findIndex((t) => t.id === currentTxIdToEdit);
+        if (idx !== -1) transactions[idx] = guestTx;
+      } else transactions.unshift(guestTx);
+      renderHomeTable();
+      renderHistoryTable();
+      calculateBalance();
       closeTxPage();
-  } catch (e) { showAlert("Error", e.message); } 
-  finally { btnSaveTx.disabled = false; }
+      if (typeof updateChartData === "function") updateChartData();
+      return;
+    }
+    // Server Logic
+    const token = await user.getIdToken();
+    const payload = {
+      ...txData,
+      date: jsDate.toISOString(),
+      id: currentTxIdToEdit,
+    };
+    await fetch(`${BASE_URL}/api/transactions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    await fetchTransactions();
+    closeTxPage();
+  } catch (e) {
+    showAlert("Error", e.message);
+  } finally {
+    btnSaveTx.disabled = false;
+  }
 }
 async function deleteTransaction() {
   if (!currentTxIdToEdit) return;
@@ -706,38 +857,104 @@ async function deleteTransaction() {
   try {
     const user = auth.currentUser;
     if (!user) {
-        transactions = transactions.filter(t => t.id !== currentTxIdToEdit);
-        renderHomeTable(); renderHistoryTable(); calculateBalance(); closeTxPage();
-        if (typeof updateChartData === "function") updateChartData();
-        return;
+      transactions = transactions.filter((t) => t.id !== currentTxIdToEdit);
+      renderHomeTable();
+      renderHistoryTable();
+      calculateBalance();
+      closeTxPage();
+      if (typeof updateChartData === "function") updateChartData();
+      return;
     }
     const token = await user.getIdToken();
-    await fetch(`${BASE_URL}/api/transactions/?id=${currentTxIdToEdit}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    await fetch(`${BASE_URL}/api/transactions/?id=${currentTxIdToEdit}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     await fetchTransactions();
     closeTxPage();
-  } catch (e) { showAlert("Error", e.message); }
+  } catch (e) {
+    showAlert("Error", e.message);
+  }
 }
 
 // === EVENT LISTENERS ===
 document.body.addEventListener("click", (e) => {
-  if (e.target.closest(".fab-add") || e.target.closest("#fab-add-tx")) openTxPage("add");
-  if (e.target.closest("#btn-back-to-home") || e.target.closest(".tx-page-back-btn")) closeTxPage();
+  if (e.target.closest(".fab-add") || e.target.closest("#fab-add-tx"))
+    openTxPage("add");
+  if (
+    e.target.closest("#btn-back-to-home") ||
+    e.target.closest(".tx-page-back-btn")
+  )
+    closeTxPage();
   if (e.target.closest("#btn-save-tx")) saveTransaction();
   if (e.target.closest("#btn-delete-tx")) deleteTransaction();
   if (e.target.closest("#btn-tx-type-income")) updateTxType("income");
   if (e.target.closest("#btn-tx-type-expense")) updateTxType("expense");
-  if (e.target.closest("#tx-category")) { categoryModalTitle.textContent = currentTxType; categoryGrid.innerHTML = ""; CATEGORIES[currentTxType].forEach(cat => { const b = document.createElement("button"); b.className="grid-item"; b.innerHTML=`${cat.icon}<span>${cat.name}</span>`; b.onclick=()=>{txCategory.value=cat.name; categoryModal.classList.add("hidden");}; categoryGrid.appendChild(b); }); categoryModal.classList.remove("hidden"); }
-  if (e.target.closest("#tx-payment")) { paymentGrid.innerHTML=""; PAYMENT_METHODS.forEach(m => { const b=document.createElement("button"); b.className="grid-item"; b.innerHTML=`${m.icon}<span>${m.name}</span>`; b.onclick=()=>{txPayment.value=m.name; paymentModal.classList.add("hidden");}; paymentGrid.appendChild(b); }); paymentModal.classList.remove("hidden"); }
-  
-  if (e.target.closest("#btn-close-category-modal") || e.target.id === "category-modal") categoryModal.classList.add("hidden");
-  if (e.target.closest("#btn-close-payment-modal") || e.target.id === "payment-modal") paymentModal.classList.add("hidden");
+  if (e.target.closest("#tx-category")) {
+    categoryModalTitle.textContent = currentTxType;
+    categoryGrid.innerHTML = "";
+    CATEGORIES[currentTxType].forEach((cat) => {
+      const b = document.createElement("button");
+      b.className = "grid-item";
+      b.innerHTML = `${cat.icon}<span>${cat.name}</span>`;
+      b.onclick = () => {
+        txCategory.value = cat.name;
+        categoryModal.classList.add("hidden");
+      };
+      categoryGrid.appendChild(b);
+    });
+    categoryModal.classList.remove("hidden");
+  }
+  if (e.target.closest("#tx-payment")) {
+    paymentGrid.innerHTML = "";
+    PAYMENT_METHODS.forEach((m) => {
+      const b = document.createElement("button");
+      b.className = "grid-item";
+      b.innerHTML = `${m.icon}<span>${m.name}</span>`;
+      b.onclick = () => {
+        txPayment.value = m.name;
+        paymentModal.classList.add("hidden");
+      };
+      paymentGrid.appendChild(b);
+    });
+    paymentModal.classList.remove("hidden");
+  }
+
+  if (
+    e.target.closest("#btn-close-category-modal") ||
+    e.target.id === "category-modal"
+  )
+    categoryModal.classList.add("hidden");
+  if (
+    e.target.closest("#btn-close-payment-modal") ||
+    e.target.id === "payment-modal"
+  )
+    paymentModal.classList.add("hidden");
   if (e.target.closest("#btn-close-alert")) alertModal.classList.add("hidden");
 
   // Chart Navigation
-  if (e.target.id === 'btn-view-monthly') { analyzeViewMode = 'monthly'; analyzeDate = new Date(); initChartPage(); }
-  if (e.target.id === 'btn-view-yearly') { analyzeViewMode = 'yearly'; analyzeDate = new Date(); initChartPage(); }
-  if (e.target.closest('#btn-chart-prev')) { analyzeViewMode === 'monthly' ? analyzeDate.setMonth(analyzeDate.getMonth() - 1) : analyzeDate.setFullYear(analyzeDate.getFullYear() - 1); initChartPage(); }
-  if (e.target.closest('#btn-chart-next')) { analyzeViewMode === 'monthly' ? analyzeDate.setMonth(analyzeDate.getMonth() + 1) : analyzeDate.setFullYear(analyzeDate.getFullYear() + 1); initChartPage(); }
+  if (e.target.id === "btn-view-monthly") {
+    analyzeViewMode = "monthly";
+    analyzeDate = new Date();
+    initChartPage();
+  }
+  if (e.target.id === "btn-view-yearly") {
+    analyzeViewMode = "yearly";
+    analyzeDate = new Date();
+    initChartPage();
+  }
+  if (e.target.closest("#btn-chart-prev")) {
+    analyzeViewMode === "monthly"
+      ? analyzeDate.setMonth(analyzeDate.getMonth() - 1)
+      : analyzeDate.setFullYear(analyzeDate.getFullYear() - 1);
+    initChartPage();
+  }
+  if (e.target.closest("#btn-chart-next")) {
+    analyzeViewMode === "monthly"
+      ? analyzeDate.setMonth(analyzeDate.getMonth() + 1)
+      : analyzeDate.setFullYear(analyzeDate.getFullYear() + 1);
+    initChartPage();
+  }
 });
 
 const navLinks = document.querySelectorAll(".nav-links a");
@@ -747,9 +964,9 @@ navLinks.forEach((link) => {
     navLinks.forEach((btn) => btn.classList.remove("active"));
     this.classList.add("active");
     const targetId = this.getAttribute("data-target");
-    document.querySelectorAll(".page-section").forEach(sec => {
-        sec.classList.remove("active");
-        if (sec.id === `page-${targetId}`) sec.classList.add("active");
+    document.querySelectorAll(".page-section").forEach((sec) => {
+      sec.classList.remove("active");
+      if (sec.id === `page-${targetId}`) sec.classList.add("active");
     });
     if (targetId === "analyze") setTimeout(initChartPage, 100);
   });
@@ -757,8 +974,13 @@ navLinks.forEach((link) => {
 
 const container = document.getElementById("profileContainer");
 if (container) {
-    container.addEventListener("click", (e) => { e.stopPropagation(); container.classList.toggle("active"); });
-    document.addEventListener("click", (e) => { if (!container.contains(e.target)) container.classList.remove("active"); });
+  container.addEventListener("click", (e) => {
+    e.stopPropagation();
+    container.classList.toggle("active");
+  });
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) container.classList.remove("active");
+  });
 }
 
 onAuthStateChanged(auth, (user) => {
@@ -770,7 +992,11 @@ onAuthStateChanged(auth, (user) => {
     if (userNameDisplay) userNameDisplay.textContent = "Guest";
     generateDummyData(); // Generate dummy for guest
   } else {
-    if (!window.location.pathname.endsWith("index.html") && !window.location.pathname.endsWith("signup.html")) window.location.href = "index.html";
+    if (
+      !window.location.pathname.endsWith("index.html") &&
+      !window.location.pathname.endsWith("signup.html")
+    )
+      window.location.href = "index.html";
   }
 });
 if (logoutBtn) {
