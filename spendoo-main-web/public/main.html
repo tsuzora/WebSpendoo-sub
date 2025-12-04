@@ -65,32 +65,41 @@
       </div>
     </header>
 
-    <!-- === MAIN CONTENT CONTAINER === -->
-    <article class="main-content">
-      <!-- 1. HOME SECTION (Original Dashboard) -->
-      <div id="balance-card-slot"></div>
-      <section id="page-home" class="page-section active">
-        <div id="transaction-navigation" role="grid">
-          <div id="quick-filter" role="rowgroup">
-            <p style="color: var(--sp-green); font-weight: 700; margin-bottom: 10px;">Quick Navigation</p>
-            <div id="filter-buttons">
-              <button id="filter-income-btn" class="filter-chip">Income</button>
-              <button id="filter-expense-btn" class="filter-chip">Expense</button>
-              <button id="filter-cat-btn" class="filter-chip">Category</button>
+  <article class="main-content">
+
+    <section id="page-home" class="page-section active">
+    
+      <div class="home-layout">
+    
+        <div id="balance-card-slot"></div>
+    
+        <div class="home-right-panel">
+    
+          <div id="transaction-navigation" role="grid">
+            <div id="quick-filter" role="rowgroup">
+              <p style="color: var(--sp-green); font-weight: 700; margin-bottom: 10px;">Quick Navigation</p>
+              <div id="filter-buttons">
+                <button id="filter-income-btn" class="filter-chip">Income</button>
+                <button id="filter-expense-btn" class="filter-chip">Expense</button>
+                <button id="filter-cat-btn" class="filter-chip">Category</button>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div id="transaction-listing-container" role="grid">
-          <div class="list-header" role="rowgroup">
-            <p class="col-header" role="columnheader">Name</p>
-            <p class="col-header" role="columnheader">Amount</p>
-            <p class="col-header" role="columnheader">Date Added</p>
+    
+          <div id="transaction-listing-container" role="grid">
+            <div class="list-header" role="rowgroup">
+              <p class="col-header" role="columnheader">Name</p>
+              <p class="col-header" role="columnheader">Amount</p>
+              <p class="col-header" role="columnheader">Date Added</p>
+            </div>
+    
+            <div id="home-scroll-container" class="activity-scroll" role="rowgroup"></div>
           </div>
-        
-          <div id="home-scroll-container" class="activity-scroll" role="rowgroup">
-          </div></div>
-      </section>
+    
+        </div>
+    
+      </div>
+    </section>
 
       <!-- 2. HISTORY SECTION -->
       <section id="page-history" class="page-section">

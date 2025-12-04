@@ -99,6 +99,13 @@
   gap: 25px;
 }
 
+#history-page #transaction-listing-container .list-header, 
+#history-page #transaction-listing-container .list-row {
+  display: grid;
+  grid-template-columns: 1fr 0.5fr 1fr; /* 3 Columns */
+  gap: 25px;
+}
+
 /* Layout B: Home Activity (Type | Name | Amount/Date) */
 .activity-list-header, 
 .activity-scroll .list-row {
@@ -203,6 +210,11 @@
   position: relative;
   padding: 12px;
   left: -75px;
+}
+#history-page #cell-amount {
+  position: relative;
+  padding: 12px;
+  left: -350px;
 }
 #cell-date {
   position: relative; 
