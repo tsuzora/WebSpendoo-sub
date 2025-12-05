@@ -11,6 +11,10 @@
   
 }
 
+:root::-webkit-scrollbar {
+  display: none;
+}
+
 /* Global Animations */
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(30px);}

@@ -199,11 +199,11 @@ body {
 .main-content {
   display: flex;
   flex-direction: row;
-  /* max-width: 95dvw; */
   min-height: 50dvh;
   max-height: 93dvh;
-  margin: 0 auto;
   padding: 12px;
+  overflow-y: auto;
+  justify-content: center;
 }
 
 .dashboard-container {

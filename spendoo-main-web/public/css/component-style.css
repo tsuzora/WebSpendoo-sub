@@ -3,6 +3,7 @@
    ========================================= */
 
 /* Main Balance Card */
+
 .balance-card {
   display: flex;
   flex-direction: row;
@@ -41,7 +42,7 @@
 /* Recent Transactions Section Wrapper */
 .recent-transactions-section {
   background-color: rgba(0, 61, 27, 0.5); /* #003d1b80 */
-  height: 72dvh;
+  height: 65dvh;
   border-radius: 0px 0px 16px 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   display: flex;
@@ -114,14 +115,19 @@
   
 /* Shared Scroll Area Styles */
 #home-scroll-container {
-  height: 67dvh;
+  height: 70dvh;
   border-radius: 0 0 16px 16px;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#home-scroll-container::-webkit-scrollbar {
+  display: none;
 }
 
 #scroll-container,
 .activity-scroll {
-  height: 78dvh;
+  height: 65dvh;
   border-radius: 0 0 16px 16px;
   overflow-y: auto; /* Changed to auto to allow scrolling */
   position: relative;

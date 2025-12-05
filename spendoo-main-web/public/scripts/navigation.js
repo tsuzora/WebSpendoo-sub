@@ -24,7 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // B. Find and show the target section
         const targetSection = document.getElementById(`page-${targetId}`);
         if (targetSection) {
-            targetSection.style.display = 'block';
+
+            if (targetId != "home") {
+                targetSection.style.display = 'block';   
+            } else {
+                targetSection.style.display = 'flex';
+            }
             
             // Small delay allows the CSS fade-in animation to trigger
             setTimeout(() => {
