@@ -199,10 +199,10 @@ body {
 .main-content {
   display: flex;
   flex-direction: row;
-  max-width: 95dvw;
+  /* max-width: 95dvw; */
   min-height: 50dvh;
   max-height: 93dvh;
-  overflow-y: auto;
+  margin: 0 auto;
   padding: 12px;
 }
 
