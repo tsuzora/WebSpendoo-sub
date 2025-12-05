@@ -129,14 +129,17 @@ body.auth-page {
 .links {
   margin-top: 25px;
 }
+
 .links a,
 .forgot-link {
+  padding: 0 16px;
   display: inline-block;
   text-decoration: none;
   color: #2effa7;
   font-weight: 500;
   transition: 0.3s;
 }
+
 .links a:hover,
 .forgot-link:hover {
   text-decoration: underline;

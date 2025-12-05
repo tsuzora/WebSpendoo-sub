@@ -394,17 +394,21 @@ function renderTransactions() {
 }
 
 function renderHistoryTable() {
-  // 1. Target the existing scroll container in HTML
   const scrollContainer = document.getElementById("scroll-container");
-
-  // Safety check: if we aren't on a page with this container, stop.
   if (!scrollContainer) return;
 
-  // 2. Clear current rows (so we don't duplicate when saving)
   scrollContainer.innerHTML = "";
 
-  // 3. Handle Empty State
-  if (transactions.length === 0) {
+  // 1. DATA SOURCE: Always Sort by Date (Newest First)
+  // We ignore 'currentFilter' and 'currentSort' here so History is always chronological.
+  const historyData = [...transactions].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB - dateA; // Descending (Newest first)
+  });
+
+  // 2. Empty State
+  if (historyData.length === 0) {
     scrollContainer.innerHTML = `
       <div style="padding: 20px; text-align: center; color: var(--sp-gray);">
         No transactions yet.
@@ -412,9 +416,9 @@ function renderHistoryTable() {
     return;
   }
 
-  // 4. Generate & Append Rows
-  transactions.forEach((tx) => {
-    // --- Date Safety Check ---
+  // 3. Render Rows
+  historyData.forEach((tx) => {
+    // Date Handling
     let txDate;
     if (tx.date && typeof tx.date.toDate === "function") {
       txDate = tx.date.toDate();
@@ -422,7 +426,6 @@ function renderHistoryTable() {
       txDate = new Date(tx.date);
     }
 
-    // Formatting
     const dateString = formatDate(txDate, {
       day: "numeric",
       month: "short",
@@ -436,14 +439,31 @@ function renderHistoryTable() {
     );
     const icon = categoryObj ? categoryObj.icon : ICONS.OTHERS;
 
-    // Create Row Element
+    // Edited Time Logic
+    let editedHtml = "";
+    if (tx.editedAt) {
+      let editDate = new Date(tx.editedAt);
+      let timeStr = editDate.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      let dateStr = editDate.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      });
+
+      editedHtml = `<small style="display:block; font-size:0.75rem; color:#f1c40f; margin-top:4px;">
+                        Edited: ${dateStr}, ${timeStr}
+                      </small>`;
+    }
+
     const row = document.createElement("div");
     row.className = "list-row";
     row.dataset.id = tx.id;
 
     // Inject HTML Structure
     row.innerHTML = `
-      <div id="cell-name"">
+      <div id="cell-name">
          <div style="width:32px; height:32px;">${icon}</div>
          <span>
             ${tx.category} 
@@ -452,7 +472,12 @@ function renderHistoryTable() {
             }</small>
          </span>
       </div>
-      <div id="cell-date">${dateString}</div>
+      
+      <div id="cell-date">
+        ${dateString}
+        ${editedHtml}
+      </div>
+      
       <div id="cell-amount" class="${
         tx.type === "income" ? "income" : "expense"
       }" style="font-weight:bold;">
@@ -460,10 +485,8 @@ function renderHistoryTable() {
       </div>
     `;
 
-    // Add Edit Listener
-    row.addEventListener("click", () => openTxPage("edit", tx.id));
+    // Note: No Click Event Listener here (Edit Disabled for History)
 
-    // Append to container
     scrollContainer.appendChild(row);
   });
 }
@@ -495,12 +518,24 @@ function openTxPage(mode, txId = null) {
 
   if (mode === "edit") {
     txPageTitle.textContent = "Edit Transaction";
-    btnDeleteTx.classList.add("show");
+    // Cek apakah tombol delete ada sebelum akses classList
+    if (typeof btnDeleteTx !== "undefined" && btnDeleteTx) {
+      btnDeleteTx.classList.add("show");
+    }
 
     const tx = transactions.find((t) => t.id === txId);
     if (tx) {
-      // Ini aman karena 'tx.date' sudah jadi Timestamp
-      currentTxDate = tx.date.toDate();
+      // === PERBAIKAN DI SINI ===
+      // Cek apakah tx.date punya fungsi toDate (berarti Timestamp Firebase)
+      // Jika tidak, anggap sudah Date Object atau String biasa
+      if (tx.date && typeof tx.date.toDate === "function") {
+        currentTxDate = tx.date.toDate();
+      } else {
+        // Buat Date baru dari nilai yang ada (aman untuk String maupun Date Object)
+        currentTxDate = new Date(tx.date);
+      }
+      // =========================
+
       updateTxType(tx.type);
       txAmount.value = tx.amount;
       txCategory.value = tx.category;
@@ -512,7 +547,10 @@ function openTxPage(mode, txId = null) {
   } else {
     // mode 'add'
     txPageTitle.textContent = "Add Transaction";
-    btnDeleteTx.classList.remove("show");
+
+    if (typeof btnDeleteTx !== "undefined" && btnDeleteTx) {
+      btnDeleteTx.classList.remove("show");
+    }
 
     // Reset form
     currentTxDate = new Date();
@@ -592,8 +630,13 @@ async function saveTransaction() {
     date: jsDate.getDate(),
     month: jsDate.toLocaleDateString("en-US", { month: "long" }),
     year: jsDate.getFullYear(),
-    userID: currentUserId || "guest", // Handle null UserID
+    userID: currentUserId || "guest",
   };
+
+
+  if (currentTxIdToEdit) {
+    txData.editedAt = new Date().toISOString();
+  }
 
   try {
     btnSaveTx.disabled = true;
@@ -622,7 +665,7 @@ async function saveTransaction() {
       }
 
       // Update UI Immediately
-      renderTransactions();
+      // renderTransactions();
       renderHomeTable();
       renderHistoryTable();
       calculateBalance();
@@ -666,21 +709,42 @@ async function saveTransaction() {
     btnSaveTx.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1B23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save`;
   }
 }
-// === MODIFIKASI SELESAI: Simpan Transaksi ===
 
-// Hapus Transaksi
+// Hapus Transaksi (Support Guest & Server)
 async function deleteTransaction() {
   if (!currentTxIdToEdit) return;
 
-  // Ganti ini dengan modal konfirmasi kustom jika ada waktu
-  const confirmed = confirm("Apakah Anda yakin ingin menghapus transaksi ini?");
+  // Konfirmasi penghapusan
+  const confirmed = confirm("Are you sure you want to delete this transaction?");
   if (!confirmed) return;
-
-  const collectionPath = `users/${currentUserId}/transactions`;
-  const docRef = doc(db, collectionPath, currentTxIdToEdit);
 
   try {
     btnDeleteTx.disabled = true;
+    btnDeleteTx.textContent = "Deleting...";
+
+    // ============================================================
+    // 1. GUEST MODE LOGIC (Local Array)
+    // ============================================================
+    if (!auth.currentUser) {
+      // Hapus dari array lokal berdasarkan ID
+      transactions = transactions.filter((t) => t.id !== currentTxIdToEdit);
+
+      // Update UI
+      renderHomeTable();
+      renderHistoryTable();
+      calculateBalance();
+      
+      // Update Chart jika ada di halaman Analyze
+      if (typeof updateChartData === "function") updateChartData();
+
+      console.log("Transaction deleted locally (Guest Mode)");
+      closeTxPage();
+      return;
+    }
+
+    // ============================================================
+    // 2. SERVER LOGIC (Logged In User)
+    // ============================================================
     const token = await auth.currentUser.getIdToken();
 
     const response = await fetch(
@@ -695,35 +759,70 @@ async function deleteTransaction() {
 
     console.log("Deleted via server");
 
-    // REFRESH DATA
+    // Refresh Data dari Server agar sinkron
     await fetchTransactions();
 
     closeTxPage();
+
   } catch (e) {
     console.error("Error deleting transaction:", e);
     showAlert("Error", "Gagal menghapus transaksi. " + e.message);
   } finally {
+    // Reset tombol kembali ke icon sampah
     btnDeleteTx.disabled = false;
+    btnDeleteTx.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
   }
 }
 
 // === FUNGSI MODAL (Kategori, Payment, Date, Time) ===
-// ... (Kode modal Anda tidak perlu diubah) ...
-// Buka Modal Kategori
+
+
 function openCategoryModal() {
+  // 1. Tentukan Warna (Hijau untuk Income, Merah untuk Expense)
+  const typeColor = currentTxType === "income" ? "#2ecc71" : "#e74c3c"; // Hijau / Merah
+  const textColor = "#ffffff"; // Putih untuk judul
+
+  // 2. Update Style KOTAK MODAL (Sheet)
+  // Kita ubah background modalnya langsung
+  categoryModalContent.style.backgroundColor = typeColor;
+  categoryModalContent.style.border = "none"; // Hapus border default jika ada
+
+  // Update Warna Teks Judul & Tombol Close agar terlihat di background berwarna
+  categoryModalTitle.style.color = textColor;
   categoryModalTitle.textContent = `Category ${
     currentTxType === "income" ? "Income" : "Expense"
   }`;
-  const categories = CATEGORIES[currentTxType];
 
+  const btnClose = document.getElementById("btn-close-category-modal");
+  if (btnClose) btnClose.style.color = textColor;
+
+  // 3. Render Item Kategori
+  const categories = CATEGORIES[currentTxType];
   categoryGrid.innerHTML = "";
+
   categories.forEach((cat) => {
     const item = document.createElement("button");
     item.className = "grid-item";
+
+    // === STYLE TOMBOL (Menyesuaikan Background Modal) ===
+    // Karena background modal sudah berwarna, tombolnya kita buat Putih/Transparan
+    item.style.backgroundColor = "rgba(0, 0, 0, 0.2)"; // Hitam transparan (gelap elegan)
+    item.style.color = "#ffffff"; // Teks & Icon Putih
+    item.style.border = "1px solid rgba(255,255,255,0.3)"; // Border tipis
+
+    // Efek Hover (Opsional, tapi bagus untuk UX)
+    item.onmouseenter = () => {
+      item.style.backgroundColor = "rgba(0,0,0,0.4)";
+    };
+    item.onmouseleave = () => {
+      item.style.backgroundColor = "rgba(0,0,0,0.2)";
+    };
+
     item.innerHTML = `
             ${cat.icon}
             <span>${cat.name}</span>
         `;
+
     item.onclick = () => {
       txCategory.value = cat.name;
       closeCategoryModal();
@@ -734,6 +833,7 @@ function openCategoryModal() {
   categoryModal.classList.remove("hidden");
   categoryModal.classList.add("sheet");
 }
+
 function closeCategoryModal() {
   categoryModal.classList.add("hidden");
   categoryModal.classList.remove("sheet");
@@ -1717,62 +1817,125 @@ function getCategorySums(dateObj) {
     return sums;
 }
 
-// === GENERATOR DATA DUMMY (UNTUK TESTING) ===
-function generateDummyData() {
-    console.log("Generating dummy data for December...");
-    
-    // Pastikan array transactions kosong dulu agar bersih
-    transactions = []; 
+const btnExportCsv = document.getElementById("btn-export-csv");
 
-    const categories = {
-        income: ['Salary', 'Bonus', 'Business', 'Investment'],
-        expense: ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment']
-    };
-
-    // Loop untuk 15 hari pertama di bulan Desember 2025
-    for (let i = 1; i <= 15; i++) {
-        // Random Tipe (Income / Expense)
-        const isExpense = Math.random() > 0.3; // 70% kemungkinan expense
-        const type = isExpense ? 'expense' : 'income';
-        
-        // Random Kategori
-        const catList = categories[type];
-        const category = catList[Math.floor(Math.random() * catList.length)];
-
-        // Random Amount (50rb - 500rb untuk expense, 1jt - 5jt untuk income)
-        let amount;
-        if (type === 'income') {
-            amount = Math.floor(Math.random() * (5000000 - 1000000) + 1000000);
-        } else {
-            amount = Math.floor(Math.random() * (500000 - 50000) + 50000);
-        }
-
-        // Buat Tanggal: Desember 2025 (Bulan 11 di JS karena index mulai 0)
-        const date = new Date(2025, 11, i); 
-
-        transactions.push({
-            id: `dummy_${i}`,
-            type: type,
-            amount: amount,
-            category: category,
-            paymentMethod: 'Cash', // Default
-            date: date, // Objek Date native
-            description: 'Dummy Data Testing'
-        });
-    }
-
-    console.log(`Berhasil membuat ${transactions.length} transaksi dummy.`);
-    
-    // --- PENTING: RE-RENDER CHART & TAMPILAN ---
-    // Kita set view mode ke Monthly & Desember agar langsung terlihat
-    analyzeViewMode = 'monthly';
-    analyzeDate = new Date(2025, 11, 1); // Set kalender aplikasi ke Des 2025
-    
-    // Panggil fungsi-fungsi render
-    if (typeof initChartPage === 'function') initChartPage();
-    if (typeof renderTransactions === 'function') renderTransactions();
-    if (typeof calculateBalance === 'function') calculateBalance();
+if (btnExportCsv) {
+  btnExportCsv.addEventListener("click", (e) => {
+    e.preventDefault(); // Mencegah link navigasi (karena href="#")
+    exportToCSV();
+  });
 }
 
-// Jalankan fungsinya langsung!
-generateDummyData();
+function exportToCSV() {
+  // 1. Cek apakah ada data
+  if (!transactions || transactions.length === 0) {
+    alert("No transactions to export yet!");
+    return;
+  }
+
+  // 2. Buat Header CSV
+  // Format: Date, Type, Category, Payment Method, Amount
+  let csvContent = "Date,Type,Category,Payment Method,Amount\n";
+
+  // 3. Loop semua transaksi dan susun baris
+  transactions.forEach((tx) => {
+    // Format Tanggal (YYYY-MM-DD)
+    let dateStr = "";
+    try {
+      const d = new Date(tx.date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      dateStr = `${year}-${month}-${day}`;
+    } catch (err) {
+      dateStr = "Invalid Date";
+    }
+
+    // Bersihkan data string agar tidak merusak format CSV (hapus koma jika ada)
+    const categoryClean = `"${tx.category}"`;
+    const paymentClean = `"${tx.paymentMethod || "-"}"`;
+
+    // Format row: 2025-12-01,expense,"Food","Cash",50000
+    const row = [dateStr, tx.type, categoryClean, paymentClean, tx.amount].join(
+      ","
+    );
+
+    csvContent += row + "\n";
+  });
+
+  // 4. Buat File Blob & Trigger Download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  // Buat elemen link sementara untuk diklik otomatis
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+
+  // Nama file: spendoo_transactions_TIMESTAMP.csv
+  const timestamp = new Date().toISOString().slice(0, 10);
+  link.setAttribute("download", `spendoo_transactions_${timestamp}.csv`);
+
+  document.body.appendChild(link);
+  link.click(); // Klik otomatis
+  document.body.removeChild(link); // Hapus link setelah klik
+}
+
+// // === GENERATOR DATA DUMMY (UNTUK TESTING) ===
+// function generateDummyData() {
+//     console.log("Generating dummy data for December...");
+    
+//     // Pastikan array transactions kosong dulu agar bersih
+//     transactions = []; 
+
+//     const categories = {
+//         income: ['Salary', 'Bonus', 'Business', 'Investment'],
+//         expense: ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment']
+//     };
+
+//     // Loop untuk 15 hari pertama di bulan Desember 2025
+//     for (let i = 1; i <= 15; i++) {
+//         // Random Tipe (Income / Expense)
+//         const isExpense = Math.random() > 0.3; // 70% kemungkinan expense
+//         const type = isExpense ? 'expense' : 'income';
+        
+//         // Random Kategori
+//         const catList = categories[type];
+//         const category = catList[Math.floor(Math.random() * catList.length)];
+
+//         // Random Amount (50rb - 500rb untuk expense, 1jt - 5jt untuk income)
+//         let amount;
+//         if (type === 'income') {
+//             amount = Math.floor(Math.random() * (5000000 - 1000000) + 1000000);
+//         } else {
+//             amount = Math.floor(Math.random() * (500000 - 50000) + 50000);
+//         }
+
+//         // Buat Tanggal: Desember 2025 (Bulan 11 di JS karena index mulai 0)
+//         const date = new Date(2025, 11, i); 
+
+//         transactions.push({
+//             id: `dummy_${i}`,
+//             type: type,
+//             amount: amount,
+//             category: category,
+//             paymentMethod: 'Cash', // Default
+//             date: date, // Objek Date native
+//             description: 'Dummy Data Testing'
+//         });
+//     }
+
+//     console.log(`Berhasil membuat ${transactions.length} transaksi dummy.`);
+    
+//     // --- PENTING: RE-RENDER CHART & TAMPILAN ---
+//     // Kita set view mode ke Monthly & Desember agar langsung terlihat
+//     analyzeViewMode = 'monthly';
+//     analyzeDate = new Date(2025, 11, 1); // Set kalender aplikasi ke Des 2025
+    
+//     // Panggil fungsi-fungsi render
+//     if (typeof initChartPage === 'function') initChartPage();
+//     if (typeof renderTransactions === 'function') renderTransactions();
+//     if (typeof calculateBalance === 'function') calculateBalance();
+// }
+
+// // Jalankan fungsinya langsung!
+// generateDummyData();
